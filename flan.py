@@ -525,12 +525,10 @@ class Lan:
 
                                     for __target in targetsUsed:
                                         if _target == __target:
-                                            print("animCont %s target %d already in!" % (animContName, _target.idx))
                                             __target.addKeys(startFrame, target.curveType, target.keys)
                                             break
 
                                     else:
-                                        print("animCont %s target %d added!" % (animContName, _target.idx))
                                         targetsUsed.append(_target)
 
             targetsUsed.sort(key=lambda target: target.idx)

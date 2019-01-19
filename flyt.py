@@ -1,7 +1,8 @@
 from bflyt import FLYT
 from common import Color4, MaterialName, UserData, LRName
 from collections import OrderedDict
-#import os
+import bflim as BFLIM
+import os
 
 
 class Vec2:
@@ -1929,12 +1930,22 @@ class TexelFormat:
 
 
 class TextureFile:
-    def __init__(self, texture, format, path=".\\Textures"):
-        # todo automatic texture conversion
-        #self.imagePath = os.path.join(path, '%s.tga' % texture)
-        self.imagePath = '%s\\%s.tga' % (path, texture)
+    def __init__(self, timgPath, timgOutP, texture, format):
+        self.imagePath = '%s\\%s.tga' % (".\\Textures", texture)
         self.format = TexelFormat(format)
-        print(self.imagePath, format, self.format.get())
+
+        if not os.path.isdir(timgOutP):
+            os.mkdir(timgOutP)
+
+        with open(os.path.join(timgPath, '%s^%s.bflim' % (texture, format)), "rb") as inf:
+            inb = inf.read()
+
+        try:
+            BFLIM.toTGA(inb, texture, timgOutP)
+            print("%s^%s.bflim converted" % (texture, format))
+
+        except NotImplementedError:
+            print("please convert %s^%s.bflim" % (texture, format))
 
     def getAsDict(self):
         return {
@@ -1959,7 +1970,7 @@ class FontFile:
 
 
 class Layout:
-    def __init__(self, file, textures, formats):
+    def __init__(self, file, timgPath, timgOutP, textures, formats):
         with open(file, "rb") as inf:
             inb = inf.read()
 
@@ -1969,6 +1980,9 @@ class Layout:
                 if texture not in self.flyt.txl.textures:
                     self.flyt.txl.textures.append(texture)
                     self.flyt.txl.formats.append(format)
+
+        self.timgPath = timgPath
+        self.timgOutP = timgOutP
 
     def getAsDict(self):
         if self.flyt.rootPane and self.flyt.lyt:
@@ -2018,7 +2032,7 @@ class Layout:
             fontList = []
 
             for texture, format in zip(textures, formats):
-                textureList.append(TextureFile(texture, format))
+                textureList.append(TextureFile(self.timgPath, self.timgOutP, texture, format))
 
             for font in fonts:
                 fontList.append(FontFile(font))

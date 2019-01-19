@@ -17,11 +17,15 @@ def main(file, output):
     print("slope type to use. Additionally, Step ensures that none of the")
     print("keys will be removed when exporting as binary from LayoutEditor.")
     print("Don't worry, this will not affect animation playback ingame.")
-    print("Enjoy. ;)")
+    print("Enjoy. ;)\n")
 
     animPath = os.path.join(os.path.dirname(os.path.dirname(file)), 'anim')
+    timgPath = os.path.join(os.path.dirname(os.path.dirname(file)), 'timg')
+    timgOutP = os.path.join(os.path.dirname(output), 'Textures')
+
     fileName = os.path.splitext(os.path.basename(file))[0]
     animOutput = os.path.splitext(output)[0] + ".flan"
+
     if os.path.isfile(os.path.join(animPath, fileName + ".bflan")):
         files = [fileName + ".bflan"]
 
@@ -35,7 +39,7 @@ def main(file, output):
     if files:
         textures, formats = flanMain(files, animPath, animOutput)
 
-    lyt = Layout(file, textures, formats)
+    lyt = Layout(file, timgPath, timgOutP, textures, formats)
 
     file = {}
     file["nw4f_layout"] = OrderedDict()

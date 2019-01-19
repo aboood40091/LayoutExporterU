@@ -1,6 +1,6 @@
 import struct
 from bflan import FLAN
-from common import readString, Section
+from common import readString, roundUp, Section
 
 
 printTexList = False
@@ -127,6 +127,108 @@ class FLYT:
             if major < 5:
                 self.controlFunctionalPaneParameterNames = self.controlFunctionalPaneNames
                 self.controlFunctionalAnimParameterNames = self.controlFunctionalAnimNames
+
+        def save(self, major):
+            controlFunctionalPaneNum = len(self.controlFunctionalPaneNames),
+            controlFunctionalAnimNum = len(self.controlFunctionalAnimNames)
+            buff1 = self.controlName.encode('utf-8') + b'\0'
+
+            controlUserNameOffset = len(buff1)
+            alignLen = roundUp(controlUserNameOffset, 4) - controlUserNameOffset
+
+            controlUserNameOffset += alignLen
+            buff1 += b'\0' * alignLen
+
+            controlFunctionalPaneNamesOffset = len(buff1)
+            if self.controlUserName:
+                buff1 += self.controlUserName.encode('utf-8') + b'\0'
+
+                controlFunctionalPaneNamesOffset = len(buff1)
+                alignLen = roundUp(controlFunctionalPaneNamesOffset, 4) - controlFunctionalPaneNamesOffset
+
+                controlFunctionalPaneNamesOffset += alignLen
+                buff1 += b'\0' * alignLen
+
+            buff2 = bytearray()
+            for name in self.controlFunctionalPaneNames:
+                buff2 += struct.pack('>24s', name.encode('utf-8'))
+
+            buff3 = bytearray()
+
+            controlFunctionalAnimNamesOffsets = []
+            for name in self.controlFunctionalAnimNames:
+                controlFunctionalAnimNamesOffsets.append(len(buff3))
+                buff3 += name.encode('utf-8')
+                buff3.append(0)
+
+            buff4 = struct.pack('>%dI' % controlFunctionalAnimNum, *controlFunctionalAnimNamesOffsets)
+
+            if major < 5:
+                controlUserNameOffset += 8
+                controlFunctionalPaneNamesOffset += 16
+
+                buff5 = struct.pack(
+                    '>I2H',
+                    controlFunctionalPaneNamesOffset,
+                    controlFunctionalPaneNum,
+                    controlFunctionalAnimNum,
+                )
+
+                self.data = b''.join([buff5, buff1, buff2, buff4, buff3])
+
+                return super().save()
+
+            else:
+                controlFunctionalPaneParameterNameOffsetsOffset = len(buff1) + len(buff2) + len(buff4) + len(buff3)
+                alignLen = roundUp(controlFunctionalPaneParameterNameOffsetsOffset, 4) - controlFunctionalPaneParameterNameOffsetsOffset
+
+                controlFunctionalPaneParameterNameOffsetsOffset += alignLen
+                buff3 += b'\0' * alignLen
+
+                buff6 = bytearray()
+
+                controlFunctionalPaneParameterNameOffsets = []
+                for name in self.controlFunctionalPaneParameterNames:
+                    controlFunctionalPaneParameterNameOffsets.append(len(buff6))
+                    buff6 += name.encode('utf-8')
+                    buff6.append(0)
+
+                buff7 = struct.pack('>%dI' % controlFunctionalPaneNum, *controlFunctionalPaneParameterNameOffsets)
+
+                controlFunctionalAnimParameterNameOffsetsOffset = controlFunctionalPaneParameterNameOffsetsOffset + len(buff7) + len(buff6)
+                alignLen = roundUp(controlFunctionalAnimParameterNameOffsetsOffset, 4) - controlFunctionalAnimParameterNameOffsetsOffset
+
+                controlFunctionalAnimParameterNameOffsetsOffset += alignLen
+                buff6 += b'\0' * alignLen
+
+                buff8 = bytearray()
+
+                controlFunctionalAnimParameterNameOffsets = []
+                for name in self.controlFunctionalAnimParameterNames:
+                    controlFunctionalAnimParameterNameOffsets.append(len(buff8))
+                    buff8 += name.encode('utf-8')
+                    buff8.append(0)
+
+                buff9 = struct.pack('>%dI' % controlFunctionalAnimNum, *controlFunctionalAnimParameterNameOffsets)
+
+                controlUserNameOffset += 20
+                controlFunctionalPaneNamesOffset += 28
+                controlFunctionalPaneParameterNameOffsetsOffset += 28
+                controlFunctionalAnimParameterNameOffsetsOffset += 28
+
+                buff5 = struct.pack(
+                    '>2I2H2I',
+                    controlUserNameOffset,
+                    controlFunctionalPaneNamesOffset,
+                    controlFunctionalPaneNum,
+                    controlFunctionalAnimNum,
+                    controlFunctionalPaneParameterNameOffsetsOffset,
+                    controlFunctionalAnimParameterNameOffsetsOffset,
+                )
+
+                self.data = b''.join([buff5, buff1, buff2, buff4, buff3, buff7, buff6, buff9, buff8])
+
+                return super().save()
 
     class TextureList(Section):
         def __init__(self, file, pos):
