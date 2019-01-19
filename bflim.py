@@ -1,10 +1,23 @@
+# I made this when I was fed up with
+# converting BFLIM to TGA manually
+# and I wanted to get something working asap
+# so, yeah, not the cleanest code ever
+
 import os
 from PIL import Image
 import struct
 
 import addrlib
-import dds
 import bcn
+
+try:
+    import pyximport
+    pyximport.install()
+
+    import gx2FormConv_cy as formConv
+
+except ImportError:
+    import gx2FormConv as formConv
 
 
 BCn_formats = [0x31, 0x431, 0x32, 0x432, 0x33, 0x433, 0x34, 0x35]
@@ -292,6 +305,6 @@ def toTGA(inb, name, texPath):
         format_ = 'rgba8'
         bpp = 4
 
-    data = dds.formConv.torgba8(tex.width, tex.height, bytearray(data), format_, bpp, tex.compSel)
+    data = formConv.torgba8(tex.width, tex.height, bytearray(data), format_, bpp, tex.compSel)
     img = Image.frombuffer("RGBA", (tex.width, tex.height), data, 'raw', "RGBA", 0, 1)
     img.save(os.path.join(texPath, "%s.tga" % name))
