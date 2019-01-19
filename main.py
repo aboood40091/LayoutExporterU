@@ -51,7 +51,7 @@ def main(file, output):
     with open(output, "w", encoding="utf-8") as out:
         out.write(xml)
 
-if name == "__main__":
+if __name__ == "__main__":
     file = input("Input (.bflyt):  ")
     output = input("Output (.flyt):  ")
     main(file, output)
