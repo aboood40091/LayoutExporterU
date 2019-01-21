@@ -417,14 +417,14 @@ def toVersion(file, output, version):
 
 
 def main():
-    file = input("Input (.bflyt):  ")
-    output = input("Output (.bflyt):  ")
-    version = int(input("Convert to version (e.g. 0x02020000):  "))
+    file = input("Input (.bflan):  ")
+    output = input("Output (.bflan):  ")
+    version = int(input("Convert to version (e.g. 0x02020000):  "), 0)
 
     with open(file, "rb") as inf:
         inb = inf.read()
 
-    toVersion(flyt, inb, output, version)
+    toVersion(inb, output, version)
 
 
 if __name__ == "__main__":

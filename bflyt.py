@@ -863,10 +863,12 @@ class FLYT:
             )
 
             buff2 = bytearray()
-            for pane in range(self.panes):
+            for pane in self.panes:
                 buff2 += struct.pack('>24s', pane.encode('utf-8'))
 
             self.data = b''.join([buff1, buff2])
+
+            return super().save()
 
     def __init__(self, file):
         if file[4:6] != b'\xFE\xFF':
@@ -1034,12 +1036,12 @@ def toVersion(file, output, dVersion):
 def main():
     file = input("Input (.bflyt):  ")
     output = input("Output (.bflyt):  ")
-    version = int(input("Convert to version (e.g. 0x02020000):  "))
+    version = int(input("Convert to version (e.g. 0x02020000):  "), 0)
 
     with open(file, "rb") as inf:
         inb = inf.read()
 
-    toVersion(flyt, inb, output, version)
+    toVersion(inb, output, version)
 
 
 if __name__ == "__main__":
