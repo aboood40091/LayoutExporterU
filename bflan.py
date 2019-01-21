@@ -387,16 +387,15 @@ class FLAN:
         if self.info:
             buff1 += self.info.save(); numSections += 1
 
-        buff2 = bytearray(struct.pack(
-            '>4s2xH2IH2x',
+        buff2 = struct.pack(
+            '>4s2H2IH2x',
             b'FLAN',
+            0xFEFF,
             20,
             self.version,
             20 + len(buff1),
             numSections,
-        ))
-
-        buff2[4:6] = b'\xFE\xFF'
+        )
 
         return b''.join([buff2, buff1])
 

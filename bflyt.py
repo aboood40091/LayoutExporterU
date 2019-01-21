@@ -1021,9 +1021,10 @@ def toVersion(file, output, dVersion):
             pos += section.blockHeader.size
 
     file[:0x14] = struct.pack(
-        '>4s2xH2IH2x',
+        '>4s2H2IH2x',
         b'FLYT',
-        0x14,
+        0xFEFF,
+        20,
         version,
         len(file),
         numSections,
