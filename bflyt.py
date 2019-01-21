@@ -95,6 +95,9 @@ class FLYT:
                 pos = self.controlUserNameOffset - 8
                 self.controlUserName = readString(self.data, pos)
 
+            if not self.controlUserName:
+                self.controlUserName = self.controlName
+
             self.controlFunctionalPaneNames = []
             if self.controlFunctionalPaneNamesOffset:
                 pos = self.controlFunctionalPaneNamesOffset - 8
