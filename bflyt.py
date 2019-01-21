@@ -854,6 +854,20 @@ class FLYT:
                 pane = readString(struct.unpack_from('>24s', file, pos + 24*i)[0])
                 self.panes.append(pane)
 
+        def save(self, major):
+            fmt = '>24sH2x' if major < 5 else '>33sxH'
+            buff1 = struct.pack(
+                fmt,
+                self.name.encode('utf-8'),
+                len(self.panes),
+            )
+
+            buff2 = bytearray()
+            for pane in range(self.panes):
+                buff2 += struct.pack('>24s', pane.encode('utf-8'))
+
+            self.data = b''.join([buff1, buff2])
+
     def __init__(self, file):
         if file[4:6] != b'\xFE\xFF':
             raise NotImplementedError("Only big endian layouts are supported")  # TODO little endian
@@ -863,6 +877,11 @@ class FLYT:
          self.version,
          self.fileSize,
          self.numSections) = struct.unpack_from('>4s2xH2IH', file)
+
+        assert self.magic == b'FLYT'
+        major = self.version >> 24  # TODO little endian
+        if major not in [2, 5]:
+            print("Untested BFLYT version: %s\n" % hex(self.version))
 
         self.lyt = None
         self.cnt = None
@@ -886,7 +905,7 @@ class FLYT:
                 pos += self.lyt.blockHeader.size
 
             elif file[pos:pos + 4] == b'cnt1':
-                self.cnt = self.Control(file, pos, self.version >> 24)  # TODO little endian
+                self.cnt = self.Control(file, pos, major)
                 pos += self.cnt.blockHeader.size
 
                 if file[pos:pos + 4] == b'usd1':
@@ -941,7 +960,7 @@ class FLYT:
                     pos += section.blockHeader.size
 
                 elif groupNestLevel == 1:
-                    group = self.Group(file, pos, self.version >> 24)  # TODO little endian
+                    group = self.Group(file, pos, major)
                     pos += group.blockHeader.size
 
                     self.groupList.append(group)
@@ -961,3 +980,67 @@ class FLYT:
             else:
                 section = Section(file, pos)
                 pos += section.blockHeader.size
+
+
+def toVersion(file, output, dVersion):
+    if file[4:6] != b'\xFE\xFF':
+        raise NotImplementedError("Only big endian layouts are supported")  # TODO little endian
+
+    (magic,
+     version,
+     numSections) = struct.unpack_from('>4s4xI4xH', file)
+
+    assert magic == b'FLYT'
+
+    file = bytearray(file)
+    dMajor = dVersion >> 24
+    major = version >> 24  # TODO little endian
+    if major not in [2, 5]:
+        print("Untested BFLYT version: %s\n" % hex(version))
+
+    pos = 0x14
+    for _ in range(numSections):
+        if file[pos:pos + 4] == b'cnt1':
+            cnt = FLYT.Control(file, pos, major)
+            size = cnt.blockHeader.size
+
+            file[pos:pos + size] = cnt.save(dMajor)
+            pos += cnt.blockHeader.size
+
+        elif file[pos:pos + 4] == b'grp1':
+            group = FLYT.Group(file, pos, major)
+            size = group.blockHeader.size
+
+            file[pos:pos + size] = group.save(dMajor)
+            pos += group.blockHeader.size
+
+        else:
+            section = Section(file, pos)
+            pos += section.blockHeader.size
+
+    file[:0x14] = struct.pack(
+        '>4s2xH2IH2x',
+        b'FLYT',
+        0x14,
+        version,
+        len(file),
+        numSections,
+    )
+
+    with open(output, "wb") as out:
+        out.write(file)
+
+
+def main():
+    file = input("Input (.bflyt):  ")
+    output = input("Output (.bflyt):  ")
+    version = int(input("Convert to version (e.g. 0x02020000):  "))
+
+    with open(file, "rb") as inf:
+        inb = inf.read()
+
+    toVersion(flyt, inb, output, version)
+
+
+if __name__ == "__main__":
+    main()

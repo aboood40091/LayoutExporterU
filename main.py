@@ -19,6 +19,9 @@ def main(file, output):
     print("Don't worry, this will not affect animation playback ingame.")
     print("Enjoy. ;)\n")
 
+    file = input("Input (.bflyt):  ")
+    output = input("Output (.flyt):  ")
+
     animPath = os.path.join(os.path.dirname(os.path.dirname(file)), 'anim')
     timgPath = os.path.join(os.path.dirname(os.path.dirname(file)), 'timg')
     timgOutP = os.path.join(os.path.dirname(output), 'Textures')
@@ -55,7 +58,6 @@ def main(file, output):
     with open(output, "w", encoding="utf-8") as out:
         out.write(xml)
 
+
 if __name__ == "__main__":
-    file = input("Input (.bflyt):  ")
-    output = input("Output (.flyt):  ")
-    main(file, output)
+    main()

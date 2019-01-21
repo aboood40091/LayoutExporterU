@@ -351,6 +351,11 @@ class FLAN:
          self.fileSize,
          self.numSections) = struct.unpack_from('>4s2xH2IH', file)
 
+        assert self.magic == b'FLAN'
+        major = self.version >> 24  # TODO little endian
+        if major not in [2, 5]:
+            print("Untested BFLAN version: %s\n" % hex(self.version))
+
         self.tag = None
         self.share = None
         self.info = None
@@ -358,7 +363,7 @@ class FLAN:
         pos = 20
         for _ in range(self.numSections):
             if file[pos:pos + 4] == b'pat1':
-                self.tag = self.AnimationTagBlock(file, pos, self.version >> 24)  # todo little endian
+                self.tag = self.AnimationTagBlock(file, pos, major)
                 pos += self.tag.blockHeader.size
 
             elif file[pos:pos + 4] == b'pah1':
@@ -384,7 +389,7 @@ class FLAN:
 
         buff2 = bytearray(struct.pack(
             '>4s2xH2IH2x',
-            self.magic,
+            b'FLAN',
             20,
             self.version,
             20 + len(buff1),
@@ -394,3 +399,33 @@ class FLAN:
         buff2[4:6] = b'\xFE\xFF'
 
         return b''.join([buff2, buff1])
+
+
+def toVersion(file, output, version):
+    major = version >> 24  # TODO little endian
+    fmt = '>24sB3x' if major < 5 else '>33sB2x'
+
+    flan = FLAN(file)
+    flan.version = version
+
+    if flan.tag:
+        for group in flan.tag.groups:
+            group.fmt = fmt
+
+    with open(output, "wb") as out:
+        out.write(flan.save())
+
+
+def main():
+    file = input("Input (.bflyt):  ")
+    output = input("Output (.bflyt):  ")
+    version = int(input("Convert to version (e.g. 0x02020000):  "))
+
+    with open(file, "rb") as inf:
+        inb = inf.read()
+
+    toVersion(flyt, inb, output, version)
+
+
+if __name__ == "__main__":
+    main()
