@@ -1025,7 +1025,7 @@ def toVersion(file, output, dVersion):
         b'FLYT',
         0xFEFF,
         20,
-        version,
+        dVersion,
         len(file),
         numSections,
     )
