@@ -92,7 +92,7 @@ class FLYT:
 
             self.controlUserName = ''
             if self.controlUserNameOffset:
-                pos = self.controlUserNameOffset
+                pos = self.controlUserNameOffset - 8
                 self.controlUserName = readString(self.data, pos)
 
             self.controlFunctionalPaneNames = []
@@ -129,7 +129,7 @@ class FLYT:
                 self.controlFunctionalAnimParameterNames = self.controlFunctionalAnimNames
 
         def save(self, major):
-            controlFunctionalPaneNum = len(self.controlFunctionalPaneNames),
+            controlFunctionalPaneNum = len(self.controlFunctionalPaneNames)
             controlFunctionalAnimNum = len(self.controlFunctionalAnimNames)
             buff1 = self.controlName.encode('utf-8') + b'\0'
 
@@ -140,7 +140,7 @@ class FLYT:
             buff1 += b'\0' * alignLen
 
             controlFunctionalPaneNamesOffset = len(buff1)
-            if self.controlUserName:
+            if self.controlUserName and major >= 5:
                 buff1 += self.controlUserName.encode('utf-8') + b'\0'
 
                 controlFunctionalPaneNamesOffset = len(buff1)
@@ -164,7 +164,7 @@ class FLYT:
             buff4 = struct.pack('>%dI' % controlFunctionalAnimNum, *controlFunctionalAnimNamesOffsets)
 
             if major < 5:
-                controlUserNameOffset += 8
+                controlUserNameOffset += 16
                 controlFunctionalPaneNamesOffset += 16
 
                 buff5 = struct.pack(
@@ -211,7 +211,7 @@ class FLYT:
 
                 buff9 = struct.pack('>%dI' % controlFunctionalAnimNum, *controlFunctionalAnimParameterNameOffsets)
 
-                controlUserNameOffset += 20
+                controlUserNameOffset += 28
                 controlFunctionalPaneNamesOffset += 28
                 controlFunctionalPaneParameterNameOffsetsOffset += 28
                 controlFunctionalAnimParameterNameOffsetsOffset += 28
