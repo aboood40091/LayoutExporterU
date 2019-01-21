@@ -6,7 +6,7 @@ from flyt import Layout
 from flan import main as flanMain
 
 
-def main(file, output):
+def main():
     print("Layout Exporter U v1.0.0")
     print("(C) 2019 AboodXD\n")
 
