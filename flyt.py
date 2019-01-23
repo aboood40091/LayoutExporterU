@@ -1937,15 +1937,20 @@ class TextureFile:
         if not os.path.isdir(timgOutP):
             os.mkdir(timgOutP)
 
-        with open(os.path.join(timgPath, '%s^%s.bflim' % (texture, format)), "rb") as inf:
-            inb = inf.read()
-
         try:
-            BFLIM.toTGA(inb, texture, timgOutP)
-            print("%s^%s.bflim converted" % (texture, format))
+            with open(os.path.join(timgPath, '%s^%s.bflim' % (texture, format)), "rb") as inf:
+                inb = inf.read()
 
-        except NotImplementedError:
+        except FileNotFoundError:
             print("please convert %s^%s.bflim" % (texture, format))
+
+        else:
+            try:
+                BFLIM.toTGA(inb, texture, timgOutP)
+                print("%s^%s.bflim converted" % (texture, format))
+
+            except NotImplementedError:
+                print("please convert %s^%s.bflim" % (texture, format))
 
     def getAsDict(self):
         return {

@@ -243,7 +243,6 @@ class Hermite:
         self.frame = 0.0
         self.value = 0.0
         self.slope = 0.0
-        self.slopeType = "Step"
 
     def set(self, startFrame, key):
         self.frame = startFrame + key.frame
@@ -255,7 +254,6 @@ class Hermite:
             "@frame": str(self.frame),
             "@value": str(self.value),
             "@slope": str(self.slope),
-            "@slopeType": self.slopeType,
         }
 
 

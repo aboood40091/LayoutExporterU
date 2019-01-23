@@ -10,15 +10,6 @@ def main():
     print("Layout Exporter U v1.0.0")
     print("(C) 2019 AboodXD\n")
 
-    print("Please note that animation keys' slope type is set to Step.")
-    print("Meaning that the animation playback in NW LayoutEditor will")
-    print("be a bit sloppy.")
-    print("This is due to the tool not being able to determine which")
-    print("slope type to use. Additionally, Step ensures that none of the")
-    print("keys will be removed when exporting as binary from LayoutEditor.")
-    print("Don't worry, this will not affect animation playback ingame.")
-    print("Enjoy. ;)\n")
-
     file = input("Input (.bflyt):  ")
     output = input("Output (.flyt):  ")
 
