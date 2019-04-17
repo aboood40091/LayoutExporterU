@@ -1000,7 +1000,7 @@ def toVersion(file, output, dVersion):
     file = bytearray(file)
     dMajor = dVersion >> 24
     major = version >> 24  # TODO little endian
-    if major not in [2, 5]:
+    if major not in [2, 3, 5]:
         print("Untested BFLYT version: %s\n" % hex(version))
 
     pos = 0x14
