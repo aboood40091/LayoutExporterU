@@ -353,7 +353,7 @@ class FLAN:
 
         assert self.magic == b'FLAN'
         major = self.version >> 24  # TODO little endian
-        if major not in [2, 5]:
+        if major not in [2, 3, 5]:
             print("Untested BFLAN version: %s\n" % hex(self.version))
 
         self.tag = None

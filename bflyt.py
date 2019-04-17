@@ -71,7 +71,7 @@ class FLYT:
 
             self.extUserDataList = None
 
-            if major < 5:
+            if major < 3:
                 (self.controlFunctionalPaneNamesOffset,
                  self.controlFunctionalPaneNum,
                  self.controlFunctionalAnimNum) = struct.unpack_from('>I2H', self.data); pos = 8
@@ -127,7 +127,7 @@ class FLYT:
                     pName = pos + struct.unpack_from('>I', self.data, pos + 4*i)[0]
                     self.controlFunctionalAnimParameterNames.append(readString(self.data, pName))
 
-            if major < 5:
+            if major < 3:
                 self.controlFunctionalPaneParameterNames = self.controlFunctionalPaneNames
                 self.controlFunctionalAnimParameterNames = self.controlFunctionalAnimNames
 
@@ -143,7 +143,7 @@ class FLYT:
             buff1 += b'\0' * alignLen
 
             controlFunctionalPaneNamesOffset = len(buff1)
-            if self.controlUserName and major >= 5:
+            if self.controlUserName and major >= 3:
                 buff1 += self.controlUserName.encode('utf-8') + b'\0'
 
                 controlFunctionalPaneNamesOffset = len(buff1)
@@ -166,7 +166,7 @@ class FLYT:
 
             buff4 = struct.pack('>%dI' % controlFunctionalAnimNum, *controlFunctionalAnimNamesOffsets)
 
-            if major < 5:
+            if major < 3:
                 controlUserNameOffset += 16
                 controlFunctionalPaneNamesOffset += 16
 
@@ -885,7 +885,7 @@ class FLYT:
 
         assert self.magic == b'FLYT'
         major = self.version >> 24  # TODO little endian
-        if major not in [2, 5]:
+        if major not in [2, 3, 5]:
             print("Untested BFLYT version: %s\n" % hex(self.version))
 
         self.lyt = None

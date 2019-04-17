@@ -211,8 +211,8 @@ def readFLIM(f):
 
 
 def get_deswizzled_data(flim):
-    result = addrlib.deswizzle(flim.width, flim.height, flim.surfOut.height, flim.format, flim.surfOut.tileMode,
-                               flim.swizzle, flim.pitch, flim.surfOut.bpp, flim.data)
+    result = addrlib.deswizzle(flim.width, flim.height, 1, flim.format, 0, 1, flim.surfOut.tileMode,
+                               flim.swizzle, flim.pitch, flim.surfOut.bpp, 0, 0, flim.data)
 
     if flim.format in BCn_formats:
         size = ((flim.width + 3) >> 2) * ((flim.height + 3) >> 2) * (addrlib.surfaceGetBitsPerPixel(flim.format) >> 3)
