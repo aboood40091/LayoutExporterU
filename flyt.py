@@ -434,7 +434,7 @@ class TevMode:
 class RGBCombine:
     def __init__(self):
         self.arg = [{"@source": "Constant", "@op": "Rgb"} for _ in range(3)]
-        self.indirectScale = []
+        self.indirectScale = None
 
         self.mode = TevMode()
         self.konst = "K0"
@@ -443,10 +443,10 @@ class RGBCombine:
         self.copyReg = False
 
     def set(self, mode, indirect):
-        self.indirectScale = []
+        self.indirectScale = None
         self.indirectRotate = 0.0
         if indirect:
-            self.indirectScale.append(Vec2())
+            self.indirectScale = Vec2()
             self.indirectScale.set(*indirect.scale)
             self.indirectRotate, = indirect.rotate
 
@@ -461,7 +461,7 @@ class RGBCombine:
         }
 
         if self.indirectScale:
-            _dict["indirectScale"], = self.indirectScale
+            _dict["indirectScale"] = [self.indirectScale.getAsDict()]
             _dict["@indirectRotate"] = self.indirectRotate
 
         return _dict
@@ -1329,6 +1329,9 @@ class Property:
         self.usageOptions = PartsPropertyUsageOptions()  # default: None
 
     def set(self, property, materialList, textureList, fontList):
+        self.alpha = None
+        self.visible = None
+
         if property.property:
             pane = property.property
 
@@ -1358,7 +1361,7 @@ class Property:
 
         if property.basicInfo:
             self.basicUserData = property.basicInfo.userData
-            self.alpha = bool(property.basicInfo.alpha)
+            self.alpha = property.basicInfo.alpha
             self.visible = bool(property.basicInfo.basicUsageFlag & 1)
             self.translate = Vec3(); self.translate.set(*property.basicInfo.translate)
             self.rotate = Vec3(); self.translate.set(*property.basicInfo.rotate)
@@ -1373,6 +1376,8 @@ class Property:
             "@kind": self.kind.get(),
             "@target": self.target.get(),
             "@usageOptions": self.usageOptions.get(),
+            "alpha":  {"@xsi:nil": "true"} if self.alpha is None else self.alpha,
+            "visible":  {"@xsi:nil": "true"} if self.visible is None else ("true" if self.visible else "false"),
         }
 
         if self.picture:
@@ -1394,9 +1399,6 @@ class Property:
             _dict["userData"] = self.userData.getAsDict()
 
         if self.translate:
-            if self.alpha: _dict["alpha xsi:nil"] = self.alpha
-            if self.visible: _dict["visible xsi:nil"] = self.visible
-
             _dict["translate"] = self.translate.getAsDict()
             _dict["rotate"] = self.rotate.getAsDict()
             _dict["scale"] = self.scale.getAsDict()
