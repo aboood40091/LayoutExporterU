@@ -1171,7 +1171,7 @@ class WindowFrame:
 
     def getAsDict(self):
         _dict = {
-            "textureFlip": self.textureFlip.get(),
+            "textureFlip": [self.textureFlip.get()],
             "material": self.material.getAsDict(),
             "materialCtr": self.materialCtr.getAsDict(),
             "@frameType": self.frameType.get(),
@@ -1358,7 +1358,7 @@ class Property:
 
         if property.basicInfo:
             self.basicUserData = property.basicInfo.userData
-            self.alpha = property.basicInfo.alpha
+            self.alpha = bool(property.basicInfo.alpha)
             self.visible = bool(property.basicInfo.basicUsageFlag & 1)
             self.translate = Vec3(); self.translate.set(*property.basicInfo.translate)
             self.rotate = Vec3(); self.translate.set(*property.basicInfo.rotate)
@@ -1394,8 +1394,9 @@ class Property:
             _dict["userData"] = self.userData.getAsDict()
 
         if self.translate:
-            _dict["alpha"] = self.alpha
-            _dict["visible"] = self.visible
+            if self.alpha: _dict["alpha xsi:nil"] = self.alpha
+            if self.visible: _dict["visible xsi:nil"] = self.visible
+
             _dict["translate"] = self.translate.getAsDict()
             _dict["rotate"] = self.rotate.getAsDict()
             _dict["scale"] = self.scale.getAsDict()
@@ -1416,11 +1417,9 @@ class Parts:
     def set(self, pane, materialList, textureList, fontList):
         properties, magnify, filename = pane.properties, pane.magnify, pane.filename
 
-        """
         for property in properties:
             self.property.append(Property())
             self.property[-1].set(property, materialList, textureList, fontList)
-        """
 
         self.magnify.set(*magnify)
         self.rawMagnify.set(*magnify)
@@ -1974,10 +1973,45 @@ class FontFile:
         }
 
 
+class PropertyForm:
+    def __init__(self):
+        self.description = ""
+
+        self.kind = PaneKind()
+        self.target = LRName()
+
+    def set(self, pane):
+        if isinstance(pane, FLYT.Picture):
+            self.kind.set(1)
+
+        elif isinstance(pane, FLYT.TextBox):
+            self.kind.set(2)
+
+        elif isinstance(pane, FLYT.Window):
+            self.kind.set(3)
+
+        elif isinstance(pane, FLYT.Bounding):
+            self.kind.set(4)
+
+        elif isinstance(pane, FLYT.Parts):
+            self.kind.set(5)
+
+        self.target.set(pane.name)
+
+    def getAsDict(self):
+        return {
+            "@kind": self.kind.get(),
+            "@target": self.target.get(),
+            "description": self.description,
+        }
+
+
 class Layout:
     def __init__(self, file, timgPath, timgOutP, textures, formats):
         with open(file, "rb") as inf:
             inb = inf.read()
+
+        self.filename = os.path.splitext(os.path.basename(file))[0]
 
         self.flyt = FLYT(inb)
         if self.flyt.txl and textures and formats:
@@ -2049,13 +2083,26 @@ class Layout:
             _dict["screenSetting"] = screenSetting.getAsDict()
 
             if control:
-                _dict["control"] = control.getAsDict()
+                _dict["control"] = [control.getAsDict()]
 
             if textureList:
                 _dict["textureFile"] = [texture.getAsDict() for texture in textureList]
 
             if fontList:
                 _dict["fontFile"] = [font.getAsDict() for font in fontList]
+
+            if layout.partsWidth and layout.partsHeight:
+                propertyForms = []
+                for pane in rootPane.getChildren():
+                    propertyForms.append(PropertyForm())
+                    propertyForms[-1].set(pane)
+
+                partsSize = Vec2()
+                partsSize.set(layout.partsWidth, layout.partsHeight)
+
+                _dict["propertyForm"] = [propertyForm.getAsDict() for propertyForm in propertyForms]
+                _dict["partsName"] = 'L_%s' % self.filename
+                _dict["partsSize"] = partsSize.getAsDict()
 
             return _dict
 
