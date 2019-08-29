@@ -1362,11 +1362,11 @@ class Property:
         if property.basicInfo:
             self.basicUserData = property.basicInfo.userData
             self.alpha = property.basicInfo.alpha
-            self.visible = bool(property.basicInfo.basicUsageFlag & 1)
+            self.visible = bool(property.basicUsageFlag & 1)
             self.translate = Vec3(); self.translate.set(*property.basicInfo.translate)
-            self.rotate = Vec3(); self.translate.set(*property.basicInfo.rotate)
-            self.scale = Vec2(); self.translate.set(*property.basicInfo.scale)
-            self.size = Vec2(); self.translate.set(*property.basicInfo.size)
+            self.rotate = Vec3(); self.rotate.set(*property.basicInfo.rotate)
+            self.scale = Vec2(); self.scale.set(*property.basicInfo.scale)
+            self.size = Vec2(); self.size.set(*property.basicInfo.size)
 
         self.target.set(property.name)
         self.usageOptions.set(property.usageFlag)

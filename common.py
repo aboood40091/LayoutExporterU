@@ -16,6 +16,11 @@ def dictToXml(dict_, pretty=True):
 
 def readString(data, offset=0, charWidth=1, encoding='utf-8'):
     end = data.find(b'\0' * charWidth, offset)
+    while end != -1:
+        if (end - offset) % charWidth == 0:
+            break
+        end = data.find(b'\0' * charWidth, end + 1)
+
     if end == -1:
         return data[offset:].decode(encoding)
 
@@ -98,7 +103,9 @@ class MaterialName:
         self.string = ""
 
     def set(self, string):
-        assert len(string) <= 20
+        if len(string) > 20:
+            print("Warning, material name '%s' must be less than 20 characters!" % string)
+
         self.string = string
 
     def get(self):
@@ -191,7 +198,9 @@ class LRName:
         self.string = ""
 
     def set(self, string):
-        assert len(string) <= 24
+        if len(string) > 24:
+            print("Warning, string '%s' must be less than 24 characters!" % string)
+
         self.string = string
 
     def get(self):
