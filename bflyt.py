@@ -29,7 +29,7 @@ def _printPan(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def readPane(file, pos):
+def readPane(file, pos, major):
     if file[pos:pos + 4] == b'pan1':
         return FLYT.Pane(file, pos)
 
@@ -46,7 +46,7 @@ def readPane(file, pos):
         return FLYT.Bounding(file, pos)
 
     elif file[pos:pos + 4] == b'prt1':
-        return FLYT.Parts(file, pos)
+        return FLYT.Parts(file, pos, major)
 
     else:
         raise NotImplementedError("Unknown pane type!")
@@ -554,6 +554,8 @@ class FLYT:
                 2: "Bottom",
             }
 
+            self.extUserDataList = None
+
             (self.flag,
              self.basePosition,
              self.alpha,
@@ -760,15 +762,18 @@ class FLYT:
     class Parts(Pane):
         class PartsProperty:
             class PartsPaneBasicInfo:
-                def __init__(self, file, pos):
+                def __init__(self, file, pos, major):
                     self.userData = readString(struct.unpack_from('>8s', file, pos)[0]); pos += 8
                     self.translate = struct.unpack_from('>3f', file, pos); pos += 12
                     self.rotate = struct.unpack_from('>3f', file, pos); pos += 12
                     self.scale = struct.unpack_from('>2f', file, pos); pos += 8
                     self.size = struct.unpack_from('>2f', file, pos); pos += 8
-                    self.alpha = file[pos]
+                    self.alpha = None
 
-            def __init__(self, file, initPos, pos):
+                    if major > 2:
+                        self.alpha = file[pos]
+
+            def __init__(self, file, initPos, pos, major):
                 (nameBytes,
                  self.usageFlag,
                  self.basicUsageFlag,
@@ -780,25 +785,28 @@ class FLYT:
 
                 self.property = None
                 if self.propertyOffset:
-                    self.property = readPane(file, initPos + self.propertyOffset)
+                    self.property = readPane(file, initPos + self.propertyOffset, major)
 
-                self.extUserData = None
-                if self.extUserDataOffset:
-                    self.extUserData = FLYT.ExtUserDataList.ExtUserData(file, initPos + self.extUserDataOffset)
+                self.extUserDataList = None
+                if self.extUserDataOffset not in [0, 1]:
+                    self.extUserDataList = FLYT.ExtUserDataList(file, initPos + self.extUserDataOffset)
 
                 self.basicInfo = None
                 if self.paneBasicInfoOffset:
-                    self.basicInfo = self.PartsPaneBasicInfo(file, initPos + self.paneBasicInfoOffset)
+                    self.basicInfo = self.PartsPaneBasicInfo(file, initPos + self.paneBasicInfoOffset, major)
 
-        def __init__(self, file, pos):
+        def __init__(self, file, pos, major):
             initPos = pos
             super().__init__(file, pos); pos += 84
 
             self.propertyNum, = struct.unpack_from('>I', file, pos); pos += 4
             self.magnify = struct.unpack_from('>2f', file, pos); pos += 8
 
-            self.properties = [self.PartsProperty(file, initPos, pos + 40*i) for i in range(self.propertyNum)]
-            pos += 40 * self.propertyNum
+            self.properties = []
+            for i in range(self.propertyNum):
+                property = self.PartsProperty(file, initPos, pos, major); pos += 40
+                if property.name:
+                    self.properties.append(property)
 
             self.filename = readString(file, pos)
             assert self.filename
@@ -832,7 +840,7 @@ class FLYT:
 
             self.num, = struct.unpack_from('>H', file, pos); pos += 4
             self.extUserData = []
-            for i in self.num:
+            for i in range(self.num):
                 self.extUserData.append(self.ExtUserData(file, pos + 12*i))
 
     class Group(Section):
@@ -904,7 +912,8 @@ class FLYT:
         self.rootPane = None
 
         pos = 0x14
-        for _ in range(self.numSections):
+        i = 0
+        while i < self.numSections:
             if file[pos:pos + 4] == b'lyt1':
                 self.lyt = self.Layout(file, pos)
                 pos += self.lyt.blockHeader.size
@@ -913,8 +922,10 @@ class FLYT:
                 self.cnt = self.Control(file, pos, major)
                 pos += self.cnt.blockHeader.size
 
-                if file[pos:pos + 4] == b'usd1':
+                if major > 2 and file[pos:pos + 4] == b'usd1':
                     self.cnt.extUserDataList = self.ExtUserDataList(file, pos)
+                    pos += self.cnt.extUserDataList.blockHeader.size
+                    i += 1
 
             elif file[pos:pos + 4] == b'txl1':
                 self.txl = self.TextureList(file, pos)
@@ -929,7 +940,7 @@ class FLYT:
                 pos += self.mat.blockHeader.size
 
             elif file[pos:pos + 4] in [b'pan1', b'pic1', b'txt1', b'wnd1', b'bnd1', b'prt1']:
-                pane = readPane(file, pos)
+                pane = readPane(file, pos, major)
 
                 if not rootPaneSet:
                     pane.isRootPane = rootPaneSet = True
@@ -942,6 +953,11 @@ class FLYT:
 
                 lastPane = pane
                 pos += pane.blockHeader.size
+
+                if file[pos:pos + 4] == b'usd1':
+                    pane.extUserDataList = self.ExtUserDataList(file, pos)
+                    pos += pane.extUserDataList.blockHeader.size
+                    i += 1
 
             elif file[pos:pos + 4] == b'pas1':
                 assert lastPane is not None
@@ -985,6 +1001,8 @@ class FLYT:
             else:
                 section = Section(file, pos)
                 pos += section.blockHeader.size
+
+            i += 1
 
 
 def toVersion(file, output, dVersion):

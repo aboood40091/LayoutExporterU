@@ -156,8 +156,11 @@ class UserData:
         self.int = []
         self.float = []
 
+        self.append(extUserData)
+
+    def append(self, extUserData):
         for userData in extUserData:
-            item = Item()
+            item = self.Item()
             item.set(userData)
 
             if item.type == "string":

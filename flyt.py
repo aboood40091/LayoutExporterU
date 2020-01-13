@@ -443,10 +443,11 @@ class RGBCombine:
         self.copyReg = False
 
     def set(self, mode, indirect):
-        self.indirectScale = None
+        self.indirectScale = Vec2()
+        self.indirectScale.set(*(1.0, 1.0))
         self.indirectRotate = 0.0
+
         if indirect:
-            self.indirectScale = Vec2()
             self.indirectScale.set(*indirect.scale)
             self.indirectRotate, = indirect.rotate
 
@@ -780,7 +781,7 @@ class Picture:
         self.material = Material()
         self.materialCtr = Material_CTR()
 
-        self.detailSetting = False
+        self.detailSetting = True
 
     def set(self, pane, materialList, textureList):
         material = materialList[pane.materialIdx]
@@ -808,10 +809,10 @@ class Picture:
             material.blendMode, material.blendModeAlpha, material.blendType,
         )
 
-        if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
-                or material.isSeparateBlendMode or material.hasIndirectParameter
-                or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
-            self.detailSetting = True
+        #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
+        #        or material.isSeparateBlendMode or material.hasIndirectParameter
+        #        or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
+        #    self.detailSetting = True
 
     def getAsDict(self):
         _dict = {
@@ -911,7 +912,7 @@ class TextBox:
         self.doubleDrawnBorderEnabled = False
         self.textAlignment = TextAlignment()
 
-        self.detailSetting = False
+        self.detailSetting = True
 
     def set(self, pane, materialList, textureList, fontList):
         material = materialList[pane.materialIdx]
@@ -964,10 +965,10 @@ class TextBox:
         self.doubleDrawnBorderEnabled = pane.doubleDrawnBorderEnabled
         self.textAlignment.set(pane.textAlignment)
 
-        if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
-                or material.isSeparateBlendMode or material.hasIndirectParameter
-                or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
-            self.detailSetting = True
+        #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
+        #        or material.isSeparateBlendMode or material.hasIndirectParameter
+        #        or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
+        #    self.detailSetting = True
 
     def getAsDict(self):
         _dict = {
@@ -1041,7 +1042,7 @@ class WindowContent:
         self.material = Material()
         self.materialCtr = Material_CTR()
 
-        self.detailSetting = False
+        self.detailSetting = True
 
     def set(self, content, materialList, textureList):
         material = materialList[content.materialIdx]
@@ -1069,10 +1070,10 @@ class WindowContent:
             material.blendMode, material.blendModeAlpha, material.blendType,
         )
 
-        if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
-                or material.isSeparateBlendMode or material.hasIndirectParameter
-                or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
-            self.detailSetting = True
+        #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
+        #        or material.isSeparateBlendMode or material.hasIndirectParameter
+        #        or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
+        #    self.detailSetting = True
 
     def getAsDict(self):
         _dict = {
@@ -1144,7 +1145,7 @@ class WindowFrame:
         self.materialCtr = Material_CTR()
 
         self.frameType = WindowFrameType()
-        self.detailSetting = False
+        self.detailSetting = True
 
     def set(self, frame, i, materialList, textureList):
         material = materialList[frame.materialIdx]
@@ -1164,10 +1165,10 @@ class WindowFrame:
             material.blendMode, material.blendModeAlpha, material.blendType,
         )
 
-        if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
-                or material.isSeparateBlendMode or material.hasIndirectParameter
-                or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
-            self.detailSetting = True
+        #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
+        #        or material.isSeparateBlendMode or material.hasIndirectParameter
+        #        or material.hasFontShadowParameter or material.isThresholdingAlphaInterpolation):
+        #    self.detailSetting = True
 
     def getAsDict(self):
         _dict = {
@@ -1355,9 +1356,9 @@ class Property:
                 self.parts.set(pane, materialList, textureList, fontList)
                 self.kind.set(5)
 
-        if property.extUserData:
+        if property.extUserDataList:
             self.userData = UserData()
-            self.userData.set([property.extUserData])
+            self.userData.set(property.extUserDataList.extUserData)
 
         if property.basicInfo:
             self.basicUserData = property.basicInfo.userData
@@ -1565,6 +1566,9 @@ class Pane:
         if not self.ignorePartsMagnify:
             self.partsMagnifyInfluence.set(bool((pane.flagEx >> 1) & 1))
 
+        if pane.extUserDataList:
+            self.userData.append(pane.extUserDataList.extUserData)
+
     def getAsDict(self):
         _dict = {
             "comment": self.comment,
@@ -1759,7 +1763,7 @@ class Grid:
         self.color.set(128, 128, 64, 128)
 
         self.moveMethod = "None"
-        self.visible = "false"  # todo make this editable
+        self.visible = "true"  # todo make this editable
         self.thinDivisionNum = "4"
         self.thickLineInterval = "40"
 
@@ -1880,7 +1884,7 @@ class Control:
         self.userData = None
         if extUserDataList:
             self.userData = UserData()
-            self.userData.set(extUserDataList)
+            self.userData.set(extUserDataList.extUserData)
 
     def getAsDict(self):
         _dict = {"@name": self.name, "@userName": self.userName}

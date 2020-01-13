@@ -20,11 +20,11 @@ def main():
     fileName = os.path.splitext(os.path.basename(file))[0]
     animOutput = os.path.splitext(output)[0] + ".flan"
 
+    files = []
     if os.path.isfile(os.path.join(animPath, fileName + ".bflan")):
-        files = [fileName + ".bflan"]
+        files.append(fileName + ".bflan")
 
-    else:
-        files = []
+    elif os.path.isdir(animPath):
         for _file in os.listdir(animPath):
             if _file.startswith(fileName + "_"):
                 files.append(_file)
