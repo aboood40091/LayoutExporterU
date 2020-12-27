@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Copyright © 2018 AboodXD
+# Licensed under GNU GPLv3
+
+################################################################
+################################################################
+
 def getComponentsFromPixel(format_, pixel, comp):
     if format_ == 'l8':
         comp[0] = pixel & 0xFF

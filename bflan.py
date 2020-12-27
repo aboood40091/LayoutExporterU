@@ -279,8 +279,8 @@ class FLAN:
                 fileName = fileName[:-6]
 
                 if len(fileName) > 2:
-                    if fileName[-1] in 'abcdefghijklmnopqrstu' and fileName[-2] == "^":
-                        format = fileName[-1:]
+                    if fileName[-1] in 'abcdefghijklmnopqrstu' and fileName[-2] in '^+':
+                        format = fileName[-2:]
                         fileName = fileName[:-2]
 
                 self.fileNames.append(fileName)
@@ -303,12 +303,7 @@ class FLAN:
             for fileName, format in zip(self.fileNames, self.formats):
                 fileNameOffsets.append(4*fileNum + len(buff1))
 
-                if format:
-                    cFileName = ''.join([fileName, "^", format, ".bflim"])
-
-                else:
-                    cFileName = ''.join([fileName, ".bflim"])
-
+                cFileName = ''.join([fileName, format, ".bflim"])
                 buff1 += cFileName.encode('utf-8')
                 buff1.append(0)
 

@@ -253,8 +253,8 @@ class FLYT:
                 texture = texture[:-6]
 
                 if len(texture) > 2:
-                    if texture[-1] in 'abcdefghijklmnopqrstu' and texture[-2] == "^":
-                        format = texture[-1:]
+                    if texture[-1] in 'abcdefghijklmnopqrstu' and texture[-2] in '^+':
+                        format = texture[-2:]
                         texture = texture[:-2]
 
                 _printTex(texture)

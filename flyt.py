@@ -1902,30 +1902,32 @@ class Control:
 
 
 class TexelFormat:
+    formats = {
+        "a": "L4",
+        "b": "A4",
+        "c": "L8",
+        "d": "A8",
+        "e": "LA4",
+        "f": "LA8",
+        "g": "HILO8",
+        "h": "RGB565",
+        "i": "RGB8",
+        "j": "RGB5A1",
+        "k": "RGBA4",
+        "l": "RGBA8",
+        "m": "ETC1",
+        "n": "ETC1A4",
+        "o": "BC1",
+        "p": "BC2",
+        "q": "BC3",
+        "r": "BC4L",
+        "s": "BC4A",
+        "t": "BC5",
+        "u": "RGB565_INDIRECT",
+    }
+
     def __init__(self, format):
-        formats = {
-            "a": "L4",
-            "b": "A4",
-            "c": "L8",
-            "d": "A8",
-            "e": "LA4",
-            "f": "LA8",
-            "g": "HILO8",
-            "h": "RGB565",
-            "i": "RGB8",
-            "j": "RGB5A1",
-            "k": "RGBA4",
-            "l": "RGBA8",
-            "m": "ETC1",
-            "n": "ETC1A4",
-            "o": "BC1",
-            "p": "BC2",
-            "q": "BC3",
-            "r": "BC4L",
-            "s": "BC4A",
-            "t": "BC5",
-            "u": "RGB565_INDIRECT",
-        }
+        formats = TexelFormat.formats
 
         assert format in formats
         self.format = formats[format]
@@ -1937,25 +1939,25 @@ class TexelFormat:
 class TextureFile:
     def __init__(self, timgPath, timgOutP, texture, format):
         self.imagePath = '%s\\%s.tga' % (".\\Textures", texture)
-        self.format = TexelFormat(format)
+        self.format = TexelFormat(format[1])
 
         if not os.path.isdir(timgOutP):
             os.mkdir(timgOutP)
 
         try:
-            with open(os.path.join(timgPath, '%s^%s.bflim' % (texture, format)), "rb") as inf:
+            with open(os.path.join(timgPath, '%s%s.bflim' % (texture, format)), "rb") as inf:
                 inb = inf.read()
 
         except FileNotFoundError:
-            print("please convert %s^%s.bflim" % (texture, format))
+            print("please convert %s%s.bflim" % (texture, format))
 
         else:
             try:
                 BFLIM.toTGA(inb, texture, timgOutP)
-                print("%s^%s.bflim converted" % (texture, format))
+                print("%s%s.bflim converted" % (texture, format))
 
             except NotImplementedError:
-                print("please convert %s^%s.bflim" % (texture, format))
+                print("please convert %s%s.bflim" % (texture, format))
 
     def getAsDict(self):
         return {

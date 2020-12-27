@@ -20,9 +20,6 @@ except ImportError:
     import gx2FormConv as formConv
 
 
-BCn_formats = [0x31, 0x431, 0x32, 0x432, 0x33, 0x433, 0x34, 0x35]
-
-
 class FLIMData:
     pass
 
@@ -55,25 +52,16 @@ class imagHeader(struct.Struct):
          self.imageSize) = self.unpack_from(data, pos)
 
 
-def computeSwizzleTileMode(z):
-    if isinstance(z, int):
-        z = bin(z)[2:].zfill(8)
+def computeSwizzleTileMode(tileModeAndSwizzlePattern):
+    if isinstance(tileModeAndSwizzlePattern, int):
+        tileMode = tileModeAndSwizzlePattern & 0x1F
+        swizzlePattern = ((tileModeAndSwizzlePattern >> 5) & 7) << 8
+        if tileMode not in [1, 2, 3, 16]:
+            swizzlePattern |= 0xd0000
 
-        tileMode = int(z[3:], 2)
+        return swizzlePattern, tileMode
 
-        if tileMode in [1, 2, 3, 16]:
-            s = 0
-
-        else:
-            s = 0xd0000
-
-        s |= int(z[:3], 2) << 8
-
-        return s, tileMode
-
-    if isinstance(z, tuple):
-        z = bin(z[0])[2:].zfill(3) + bin(z[1])[2:].zfill(5)
-        return int(z, 2)
+    return tileModeAndSwizzlePattern[0] << 5 | tileModeAndSwizzlePattern[1]  # swizzlePattern << 5 | tileMode
 
 
 def readFLIM(f):
@@ -104,87 +92,113 @@ def readFLIM(f):
     flim.width = info.width
     flim.height = info.height
 
-    if info.format_ == 0x00:
+    if info.format_ == 0x00:  # ^c
         flim.format = 0x01
         flim.compSel = [0, 0, 0, 5]
 
-    elif info.format_ == 0x01:
+    elif info.format_ == 0x01:  # ^d
         flim.format = 0x01
         flim.compSel = [5, 5, 5, 0]
 
-    elif info.format_ == 0x02:
+    elif info.format_ == 0x02:  # ^e
         flim.format = 0x02
         flim.compSel = [0, 0, 0, 1]
 
-    elif info.format_ == 0x03:
+    elif info.format_ == 0x03:  # ^f
         flim.format = 0x07
         flim.compSel = [0, 0, 0, 1]
 
-    elif info.format_ in [0x05, 0x19]:
+    elif info.format_ == 0x04:  # ^g
+        flim.format = 0x07
+        flim.compSel = [0, 1, 4, 5]
+
+    elif info.format_ == 0x05:  # ^h
         flim.format = 0x08
         flim.compSel = [2, 1, 0, 5]
 
-    elif info.format_ == 0x06:
-        flim.format = 0x1a
-        flim.compSel = [0, 1, 2, 5]
+    #elif info.format_ == 0x06:  # unsupported by NW, ^i
+    #    flim.format = 0x1a
+    #    flim.compSel = [0, 1, 2, 5]
 
-    elif info.format_ == 0x07:
+    elif info.format_ == 0x07:  # ^j
         flim.format = 0x0a
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x08:
+    elif info.format_ == 0x08:  # ^k
         flim.format = 0x0b
-        flim.compSel = [2, 1, 0, 3]
+        flim.compSel = [3, 2, 1, 0]
 
-    elif info.format_ == 0x09:
+    elif info.format_ == 0x09:  # ^l
         flim.format = 0x1a
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x0C:
+    #elif info.format_ == 0x0a:  # unsupported by NW, ^m
+    #    flim.format = 0x31
+    #    flim.format_ = "ETC1"
+    #    flim.compSel = [0, 1, 2, 5]
+
+    #elif info.format_ == 0x0b:  # unsupported by NW, ^n
+    #    flim.format = 0x33
+    #    flim.format_ = "ETC1A4"
+    #    flim.compSel = [0, 1, 2, 3]
+
+    elif info.format_ == 0x0c:  # ^o
         flim.format = 0x31
         flim.format_ = "BC1"
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x0D:
+    elif info.format_ == 0x0d:  # ^p
         flim.format = 0x32
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x0E:
+    elif info.format_ == 0x0e:  # ^q
         flim.format = 0x33
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x0F:
+    elif info.format_ == 0x0f:  # ^r, +r
         flim.format = 0x34
         flim.compSel = [0, 0, 0, 5]
 
-    elif info.format_ == 0x10:
+    elif info.format_ == 0x10:  # ^s
         flim.format = 0x34
         flim.compSel = [5, 5, 5, 0]
 
-    elif info.format_ == 0x11:
+    elif info.format_ == 0x11:  # ^t
         flim.format = 0x35
         flim.compSel = [0, 0, 0, 1]
 
-    elif info.format_ == 0x14:
+    #elif info.format_ == 0x12:  # unsupported by NW, ^a
+    #    flim.format = 0x34
+    #    flim.compSel = [0, 0, 0, 5]
+
+    #elif info.format_ == 0x13:  # unsupported by NW, ^b
+    #    flim.format = 0x34
+    #    flim.compSel = [4, 4, 4, 0]
+
+    elif info.format_ == 0x14:  # ^l
         flim.format = 0x41a
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x15:
+    elif info.format_ == 0x15:  # ^o
         flim.format = 0x431
         flim.format_ = "BC1"
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x16:
+    elif info.format_ == 0x16:  # ^p
         flim.format = 0x432
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x17:
+    elif info.format_ == 0x17:  # ^q
         flim.format = 0x433
         flim.compSel = [0, 1, 2, 3]
 
-    elif info.format_ == 0x18:
-        flim.format = 0x19
-        flim.compSel = [0, 1, 2, 3]
+    #elif info.format_ == 0x18:  # unsupported by NW LayoutEditor
+    #    flim.format = 0x19
+    #    flim.compSel = [0, 1, 2, 3]
+
+    elif info.format_ == 0x19:  # ^u
+        flim.format = 0x08
+        flim.compSel = [0, 2, 5, 1]
 
     else:
         raise NotImplementedError("Unsupported texture format: " + hex(info.format_))
@@ -193,12 +207,18 @@ def readFLIM(f):
 
     # Calculate swizzle and tileMode
     flim.swizzle, flim.tileMode = computeSwizzleTileMode(info.swizzle_tileMode)
+    if not 1 <= flim.tileMode <= 16:
+        raise ValueError("Invalid tileMode!")
 
     flim.alignment = info.alignment
 
     surfOut = addrlib.getSurfaceInfo(flim.format, flim.width, flim.height, 1, 1, flim.tileMode, 0, 0)
 
-    if surfOut.depth != 1:
+    tilingDepth = surfOut.depth
+    if surfOut.tileMode == 3:
+        tilingDepth //= 4
+
+    if tilingDepth != 1:
         raise NotImplementedError("Unsupported depth!")
 
     flim.pitch = surfOut.pitch
@@ -214,7 +234,7 @@ def get_deswizzled_data(flim):
     result = addrlib.deswizzle(flim.width, flim.height, 1, flim.format, 0, 1, flim.surfOut.tileMode,
                                flim.swizzle, flim.pitch, flim.surfOut.bpp, 0, 0, flim.data)
 
-    if flim.format in BCn_formats:
+    if (flim.format & 0x3F) in (0x31, 0x32, 0x33, 0x34, 0x35):
         size = ((flim.width + 3) >> 2) * ((flim.height + 3) >> 2) * (addrlib.surfaceGetBitsPerPixel(flim.format) >> 3)
 
     else:
@@ -223,88 +243,48 @@ def get_deswizzled_data(flim):
     return result[:size]
 
 
+# Supported formats
+formats = {
+    0x1: ('l8', 1),
+    0x2: ('la4', 1),
+    0x7: ('la8', 2),
+    0x8: ('rgb565', 2),
+    0xa: ('rgb5a1', 2),
+    0xb: ('rgba4', 2),
+    0x19: ('bgr10a2', 4),
+    0x1a: ('rgba8', 4),
+    0x31: ('rgba8', 4),
+    0x32: ('rgba8', 4),
+    0x33: ('rgba8', 4),
+    0x34: ('rgba8', 4),
+    0x35:  ('rgba8', 4),
+}
+
+def texureToRGBA8(width, height, format_, data, compSel):
+    formatStr, bpp = formats[format_ & 0x3F]
+
+    ### Decompress the data if compressed ###
+
+    if (format_ & 0x3F) == 0x31:
+        data = bcn.decompressDXT1(data, width, height)
+
+    elif (format_ & 0x3F) == 0x32:
+        data = bcn.decompressDXT3(data, width, height)
+
+    elif (format_ & 0x3F) == 0x33:
+        data = bcn.decompressDXT5(data, width, height)
+
+    elif (format_ & 0x3F) == 0x34:
+        data = bcn.decompressBC4(data, width, height, format_ >> 8)
+
+    elif (format_ & 0x3F) == 0x35:
+        data = bcn.decompressBC5(data, width, height, format_ >> 8)
+
+    return formConv.torgba8(width, height, bytearray(data), formatStr, bpp, compSel)
+
+
 def toTGA(inb, name, texPath):
     tex = readFLIM(inb)
-    result = [get_deswizzled_data(tex)]
-
-    if tex.format == 0x1:
-        data = result[0]
-
-        format_ = 'l8'
-        bpp = 1
-
-    elif tex.format == 0x2:
-        data = result[0]
-
-        format_ = 'la4'
-        bpp = 1
-
-    elif tex.format == 0x7:
-        data = result[0]
-
-        format_ = 'la8'
-        bpp = 2
-
-    elif tex.format == 0x8:
-        data = result[0]
-
-        format_ = 'rgb565'
-        bpp = 2
-
-    elif tex.format == 0xa:
-        data = result[0]
-
-        format_ = 'rgb5a1'
-        bpp = 2
-
-    elif tex.format == 0xb:
-        data = result[0]
-
-        format_ = 'rgba4'
-        bpp = 2
-
-    elif tex.format == 0x19:
-        data = result[0]
-
-        format_ = 'bgr10a2'
-        bpp = 4
-
-    elif (tex.format & 0x3F) == 0x1a:
-        data = result[0]
-
-        format_ = 'rgba8'
-        bpp = 4
-
-    elif (tex.format & 0x3F) == 0x31:
-        data = bcn.decompressDXT1(result[0], tex.width, tex.height)
-
-        format_ = 'rgba8'
-        bpp = 4
-
-    elif (tex.format & 0x3F) == 0x32:
-        data = bcn.decompressDXT3(result[0], tex.width, tex.height)
-
-        format_ = 'rgba8'
-        bpp = 4
-
-    elif (tex.format & 0x3F) == 0x33:
-        data = bcn.decompressDXT5(result[0], tex.width, tex.height)
-
-        format_ = 'rgba8'
-        bpp = 4
-
-    elif (tex.format & 0x3F) == 0x34:
-        data = bcn.decompressBC4(result[0], tex.width, tex.height, tex.format >> 8)
-
-        format_ = 'rgba8'
-        bpp = 4
-
-    else:
-        data = bcn.decompressBC5(result[0], tex.width, tex.height, tex.format >> 8)
-
-        format_ = 'rgba8'
-        bpp = 4
-
-    data = formConv.torgba8(tex.width, tex.height, bytearray(data), format_, bpp, tex.compSel)
+    data = texureToRGBA8(tex.width, tex.height, tex.format, get_deswizzled_data(tex), tex.compSel)
     img = Image.frombuffer("RGBA", (tex.width, tex.height), data, 'raw', "RGBA", 0, 1)
     img.save(os.path.join(texPath, "%s.tga" % name))
