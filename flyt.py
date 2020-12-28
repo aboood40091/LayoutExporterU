@@ -2079,6 +2079,10 @@ class Layout:
             fontList = []
 
             for texture, format in zip(textures, formats):
+                if format[0] == '+':
+                    print("%s%s.bflim conversion skipped, please convert %s^%s.bflim or make sure it has already been converted." % (texture, format, texture, format[1:]))
+                    continue
+
                 textureList.append(TextureFile(self.timgPath, self.timgOutP, texture, format))
 
             for font in fonts:

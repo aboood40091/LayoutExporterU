@@ -116,7 +116,7 @@ def readFLIM(f):
         flim.format = 0x08
         flim.compSel = [2, 1, 0, 5]
 
-    #elif info.format_ == 0x06:  # unsupported by NW, ^i
+    #elif info.format_ == 0x06:  # unsupported by NW4F, ^i
     #    flim.format = 0x1a
     #    flim.compSel = [0, 1, 2, 5]
 
@@ -132,12 +132,12 @@ def readFLIM(f):
         flim.format = 0x1a
         flim.compSel = [0, 1, 2, 3]
 
-    #elif info.format_ == 0x0a:  # unsupported by NW, ^m
+    #elif info.format_ == 0x0a:  # unsupported by NW4F, ^m
     #    flim.format = 0x31
     #    flim.format_ = "ETC1"
     #    flim.compSel = [0, 1, 2, 5]
 
-    #elif info.format_ == 0x0b:  # unsupported by NW, ^n
+    #elif info.format_ == 0x0b:  # unsupported by NW4F, ^n
     #    flim.format = 0x33
     #    flim.format_ = "ETC1A4"
     #    flim.compSel = [0, 1, 2, 3]
@@ -167,11 +167,11 @@ def readFLIM(f):
         flim.format = 0x35
         flim.compSel = [0, 0, 0, 1]
 
-    #elif info.format_ == 0x12:  # unsupported by NW, ^a
+    #elif info.format_ == 0x12:  # unsupported by NW4F, ^a
     #    flim.format = 0x34
     #    flim.compSel = [0, 0, 0, 5]
 
-    #elif info.format_ == 0x13:  # unsupported by NW, ^b
+    #elif info.format_ == 0x13:  # unsupported by NW4F, ^b
     #    flim.format = 0x34
     #    flim.compSel = [4, 4, 4, 0]
 
@@ -192,7 +192,7 @@ def readFLIM(f):
         flim.format = 0x433
         flim.compSel = [0, 1, 2, 3]
 
-    #elif info.format_ == 0x18:  # unsupported by NW LayoutEditor
+    #elif info.format_ == 0x18:  # unsupported by NW4F LayoutEditor
     #    flim.format = 0x19
     #    flim.compSel = [0, 1, 2, 3]
 
