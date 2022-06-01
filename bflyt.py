@@ -2,12 +2,10 @@ import struct
 from bflan import FLAN
 from common import readString, roundUp, Section
 
-
 printTexList = False
 printFntList = False
 printMatInfo = False
 printPanInfo = False
-
 
 def _printTex(*args, **kwargs):
     if printTexList:
@@ -826,7 +824,7 @@ class FLYT:
                     if self.type == 0:
                         tempPos = pos + self.dataOffset
                         for _ in range(self.num):
-                            _string = readString(file, tempPos); tempPos += len(string) + 1
+                            _string = readString(file, tempPos); tempPos += len(_string) + 1
                             self.data.append(_string)
 
                     elif self.type == 1:
@@ -923,7 +921,7 @@ class FLYT:
                 pos += self.cnt.blockHeader.size
 
                 if major > 2 and file[pos:pos + 4] == b'usd1':
-                    self.cnt.extUserDataList = self.ExtUserDataList(file, pos)
+                    self.cnt.extUserDataList = self.ExtUserDataList(file, pos)  # type: ignore
                     pos += self.cnt.extUserDataList.blockHeader.size
                     i += 1
 
@@ -943,7 +941,7 @@ class FLYT:
                 pane = readPane(file, pos, major)
 
                 if not rootPaneSet:
-                    pane.isRootPane = rootPaneSet = True
+                    pane.isRootPane = rootPaneSet = True  # type: ignore
 
                     # We don't need to add all panes to a list, since we can just get all panes from the root pane
                     self.rootPane = pane
@@ -955,7 +953,7 @@ class FLYT:
                 pos += pane.blockHeader.size
 
                 if file[pos:pos + 4] == b'usd1':
-                    pane.extUserDataList = self.ExtUserDataList(file, pos)
+                    pane.extUserDataList = self.ExtUserDataList(file, pos)  # type: ignore
                     pos += pane.extUserDataList.blockHeader.size
                     i += 1
 
@@ -968,7 +966,7 @@ class FLYT:
 
             elif file[pos:pos + 4] == b'pae1':
                 lastPane = parent
-                parent = lastPane.parent
+                parent = lastPane.parent  # type: ignore
 
                 section = Section(file, pos)
                 pos += section.blockHeader.size

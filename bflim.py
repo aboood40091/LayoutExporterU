@@ -3,9 +3,10 @@
 # and I wanted to get something working asap
 # so, yeah, not the cleanest code ever
 
-import os
+from typing import Any
 from PIL import Image
 import struct
+import os
 
 import addrlib
 import bcn
@@ -14,13 +15,25 @@ try:
     import pyximport
     pyximport.install()
 
-    import gx2FormConv_cy as formConv
+    import gx2FormConv_cy as formConv  # type: ignore
 
 except ImportError:
     import gx2FormConv as formConv
 
 
 class FLIMData:
+    width: int
+    height: int
+    format: int
+    format_: str
+    compSel: list[int]
+    imageSize: int
+    swizzle: int
+    tileMode: int
+    alignment: Any
+    pitch: Any
+    surfOut: object
+    data: Any
     pass
 
 
@@ -75,7 +88,7 @@ def readFLIM(f):
     elif f[pos + 4:pos + 6] == b'\xFE\xFF':
         bom = '>'
 
-    header = FLIMHeader(bom)
+    header = FLIMHeader(bom)  # type: ignore
     header.data(f, pos)
 
     if header.magic != b'FLIM':
@@ -83,7 +96,7 @@ def readFLIM(f):
 
     pos += header.size
 
-    info = imagHeader(bom)
+    info = imagHeader(bom)  # type: ignore
     info.data(f, pos)
 
     if info.magic != b'imag':
@@ -283,7 +296,7 @@ def texureToRGBA8(width, height, format_, data, compSel):
     return formConv.torgba8(width, height, bytearray(data), formatStr, bpp, compSel)
 
 
-def toTGA(inb, name, texPath):
+def toTGA(inb: bytes, name: str, texPath: str):
     tex = readFLIM(inb)
     data = texureToRGBA8(tex.width, tex.height, tex.format, get_deswizzled_data(tex), tex.compSel)
     img = Image.frombuffer("RGBA", (tex.width, tex.height), data, 'raw', "RGBA", 0, 1)

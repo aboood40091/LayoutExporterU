@@ -99,7 +99,7 @@ def dxt135_decode_imageblock(pixdata, img_block_src, i, j, dxt_type):
             if dxt_type == 1:
                 ACOMP = 0
  
-    return ACOMP, RCOMP, GCOMP, BCOMP
+    return ACOMP, RCOMP, GCOMP, BCOMP  # type: ignore
 
 
 def dxt5_decode_alphablock(pixdata, blksrc, i, j):
@@ -111,6 +111,7 @@ def dxt5_decode_alphablock(pixdata, blksrc, i, j):
             (pixdata[blksrc + 4] << 32) | (pixdata[blksrc + 5] << 40) |
             (pixdata[blksrc + 6] << 48) | (pixdata[blksrc + 7] << 56)) >> 16
 
+    code = 1e400
     for y in range(4):
         for x in range(4):
             if (x, y) == (i, j):
@@ -149,6 +150,7 @@ def dxt5_decode_alphablock_signed(pixdata, blksrc, i, j):
             (pixdata[blksrc + 4] << 32) | (pixdata[blksrc + 5] << 40) |
             (pixdata[blksrc + 6] << 48) | (pixdata[blksrc + 7] << 56)) >> 16
 
+    code = 1e400
     for y in range(4):
         for x in range(4):
             if (x, y) == (i, j):
