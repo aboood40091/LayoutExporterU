@@ -11,7 +11,7 @@ try:
     import pyximport
     pyximport.install()
 
-    from . import addrlib_cy as addrlib
+    from . import addrlib_cy as addrlib  # type: ignore
 
 except:
     from . import addrlib

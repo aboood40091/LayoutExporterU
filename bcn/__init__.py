@@ -12,7 +12,7 @@ try:
     import pyximport
     pyximport.install()
 
-    from . import decompress_cy as decompress_
+    from . import decompress_cy as decompress_  # type: ignore
 
 except:
     from . import decompress_

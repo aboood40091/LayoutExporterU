@@ -1,7 +1,6 @@
 import struct
 from common import readString, roundUp, Section
 
-
 class FLAN:
     class AnimationTagBlock(Section):
         class AnimationGroupRef:

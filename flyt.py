@@ -1,16 +1,16 @@
+from typing import Any
 from bflyt import FLYT
 from common import Color4, MaterialName, UserData, LRName
 from collections import OrderedDict
 import bflim as BFLIM
 import os
 
-
 class Vec2:
     def __init__(self):
-        self.x = 0
-        self.y = 0
+        self.x: int = 0
+        self.y: int = 0
 
-    def set(self, x, y):
+    def set(self, x: int, y: int):
         self.x, self.y = x, y
 
     def getAsDict(self):
@@ -22,11 +22,11 @@ class Vec2:
 
 class Vec3:
     def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.z = 0
+        self.x: int = 0
+        self.y: int = 0
+        self.z: int = 0
 
-    def set(self, x, y, z):
+    def set(self, x: int, y: int, z: int):
         self.x, self.y, self.z = x, y, z
 
     def getAsDict(self):
@@ -53,10 +53,10 @@ class MaterialHSBAdjustment:
 
 class TexVec2:
     def __init__(self):
-        self.s = 0.0
-        self.t = 0.0
+        self.s: float = 0.0
+        self.t: float = 0.0
 
-    def set(self, s, t):
+    def set(self, s: float, t: float):
         self.s, self.t = s, t
 
     def getAsDict(self):
@@ -83,7 +83,7 @@ class Position:
         self.x = "Left"
         self.y = "Top"
 
-    def set(self, x, y):
+    def set(self, x: int, y: int):
         assert x in self.xModes
         assert y in self.yModes
         self.x, self.y = self.xModes[x], self.yModes[y]
@@ -102,7 +102,7 @@ class BlackColor:
         self.b = 0
         self.a = 0
 
-    def set(self, r, g, b, a=0):
+    def set(self, r: int, g: int, b: int, a: int = 0):
         self.r, self.g, self.b, self.a = r, g, b, a
 
     def getAsDict(self):
@@ -125,7 +125,7 @@ class WhiteColor:
         self.b = 255
         self.a = 255
 
-    def set(self, r, g, b, a=255):
+    def set(self, r: int, g: int, b: int, a: int = 255):
         self.r, self.g, self.b, self.a = r, g, b, a
 
     def getAsDict(self):
@@ -143,9 +143,9 @@ class WhiteColor:
 
 class TexMapIDRef:
     def __init__(self):
-        self.value = -1
+        self.value: int = -1
 
-    def set(self, value):
+    def set(self, value: int):
         assert -1 <= value <= 2
         self.value = value
 
@@ -160,7 +160,7 @@ class TexCoord:
         self.texLB = TexVec2()
         self.texRB = TexVec2()
 
-    def set(self, texLT, texRT, texLB, texRB):
+    def set(self, texLT: list[float], texRT: list[float], texLB: list[float], texRB: list[float]):
         self.texLT.set(*texLT)
         self.texRT.set(*texRT)
         self.texLB.set(*texLB)
@@ -185,7 +185,7 @@ class TexWrapMode:
 
         self.string = "Clamp"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -202,7 +202,7 @@ class TexFilter:
 
         self.string = "Linear"
 
-    def set(self, filter):
+    def set(self, filter: int):
         assert filter in self.filters
         self.string = self.filters[filter]
 
@@ -212,14 +212,14 @@ class TexFilter:
 
 class TexMap:
     def __init__(self):
-        self.imageName = ""
+        self.imageName: str = ""
         self.wrap_s = TexWrapMode()
         self.wrap_t = TexWrapMode()
         self.minFilter = TexFilter()
         self.magFilter = TexFilter()
 
-    def set(self, texMap, textureList):
-        texName = textureList[texMap.texIdx]
+    def set(self, texMap: Any, textureList: list[str]):
+        texName: str = textureList[texMap.texIdx]
         assert len(texName) <= 128
         self.imageName = texName
         self.wrap_s.set(texMap.wrapS)
@@ -250,9 +250,9 @@ class TexMatrix:
         self.scale = Vec2()
         self.translate = Vec2()
 
-        self.rotate = 0.0
+        self.rotate: float = 0.0
 
-    def set(self, texMatrix):
+    def set(self, texMatrix: Any):
         self.scale.set(*texMatrix.scale)
         self.translate.set(*texMatrix.translate)
         self.rotate, = texMatrix.rotate
@@ -276,9 +276,9 @@ class TexGenSrc:
             5: "PerspectiveProjection",
         }
 
-        self.string = "Tex0"
+        self.string: str = "Tex0"
 
-    def set(self, source):
+    def set(self, source: int):
         assert source in self.sources
         self.string = self.sources[source]
 
@@ -296,7 +296,7 @@ class TexCoordGen:
         self.fittingPaneSizeEnabled = False
         self.adjustProjectionSREnabled = False
 
-    def set(self, texCoordGen):
+    def set(self, texCoordGen: Any):
         if texCoordGen.projectionTexGenParameter:
             self.projectionScale.set(*texCoordGen.projectionTexGenParameter.scale)
             self.projectionTrans.set(*texCoordGen.projectionTexGenParameter.translate)
@@ -306,8 +306,8 @@ class TexCoordGen:
             self.adjustProjectionSREnabled = texCoordGen.projectionTexGenParameter.isAdjustProjectionSREnabled
 
         else:
-            self.projectionScale.set(1.0, 1.0)
-            self.projectionTrans.set(0.0, 0.0)
+            self.projectionScale.set(1.0, 1.0)  # type: ignore
+            self.projectionTrans.set(0.0, 0.0)  # type: ignore
 
             self.fittingLayoutSizeEnabled = False
             self.fittingPaneSizeEnabled = False
@@ -339,16 +339,16 @@ class Material:
         self.blackColor = BlackColor()
         self.whiteColor = WhiteColor()
         self.hsbAdjustment = MaterialHSBAdjustment()
-        self.texMap = []  # TexMap
-        self.texMatrix = []  # TexMatrix
-        self.texCoordGen = []  # TexCoordGen
-        self.textureStage = []  # TexMapIDRef
-        self.texBlendRatio = []  # TexBlendRatio
+        self.texMap: list[TexMap] = []  # TexMap
+        self.texMatrix: list[TexMatrix] = []  # TexMatrix
+        self.texCoordGen: list[TexCoordGen] = []  # TexCoordGen
+        self.textureStage: list[TexMapIDRef] = []  # TexMapIDRef
+        self.texBlendRatio: list[Any] = []  # TexBlendRatio
 
         self.name = MaterialName()
         self.isThresholdingAlphaInterpolationEnabled = False
 
-    def set(self, blackColor, whiteColor, texMap, textureList, texMatrix, texCoordGen, name, isThresholdingAlphaInterpolationEnabled=False):
+    def set(self, blackColor: Any, whiteColor: Any, texMap: list[TexMap], textureList: list[str], texMatrix: list[TexMatrix], texCoordGen: list[TexCoordGen], name: str, isThresholdingAlphaInterpolationEnabled: bool = False):
         self.blackColor.set(*blackColor)
         self.whiteColor.set(*whiteColor)
 
@@ -376,7 +376,7 @@ class Material:
         self.isThresholdingAlphaInterpolationEnabled = isThresholdingAlphaInterpolationEnabled
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "blackColor": self.blackColor.getAsDict(),
             "whiteColor": self.whiteColor.getAsDict(),
             "hsbAdjustment": self.hsbAdjustment.getAsDict(),
@@ -421,9 +421,9 @@ class TevMode:
             11: "EachIndirect",
         }
 
-        self.string = "Replace"
+        self.string: str = "Replace"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -439,17 +439,17 @@ class RGBCombine:
         self.mode = TevMode()
         self.konst = "K0"
         self.scale = "V1"
-        self.indirectRotate = 0.0
+        self.indirectRotate: float = 0.0
         self.copyReg = False
 
-    def set(self, mode, indirect):
+    def set(self, mode: int, indirect: Any):
         self.indirectScale = Vec2()
-        self.indirectScale.set(*(1.0, 1.0))
+        self.indirectScale.set(*(1.0, 1.0))  # type: ignore
         self.indirectRotate = 0.0
 
         if indirect:
-            self.indirectScale.set(*indirect.scale)
-            self.indirectRotate, = indirect.rotate
+            self.indirectScale.set(*indirect.scale)  # type: ignore
+            self.indirectRotate, = indirect.rotate  # type: ignore
 
         self.mode.set(mode)
 
@@ -463,7 +463,7 @@ class RGBCombine:
 
         if self.indirectScale:
             _dict["indirectScale"] = [self.indirectScale.getAsDict()]
-            _dict["@indirectRotate"] = self.indirectRotate
+            _dict["@indirectRotate"] = self.indirectRotate  # type: ignore
 
         return _dict
 
@@ -477,7 +477,7 @@ class AlphaCombine:
         self.scale = "V1"
         self.copyReg = False
 
-    def set(self, mode):
+    def set(self, mode: int):
         self.mode.set(mode)
 
     def getAsDict(self):
@@ -494,7 +494,7 @@ class TevStage:
         self.rgb = RGBCombine()
         self.alpha = AlphaCombine()
 
-    def set(self, tevStage, indirect=None):
+    def set(self, tevStage: Any, indirect: Any = None):
         self.rgb.set(tevStage.combineRgb, indirect)
         self.alpha.set(tevStage.combineAlpha)
 
@@ -520,7 +520,7 @@ class Compare:
 
         self.string = "Always"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -531,9 +531,9 @@ class Compare:
 class AlphaCompare:
     def __init__(self):
         self.comp = Compare()
-        self.ref = 0.0
+        self.ref: float = 0.0
 
-    def set(self, alphaCompare=None):
+    def set(self, alphaCompare: Any = None):
         if alphaCompare:
             self.comp.set(alphaCompare.func)
             self.ref = alphaCompare.ref
@@ -553,9 +553,9 @@ class BlendMode:
             "Logic",
         ]
 
-        self.string = "None"
+        self.string: str = "None"
 
-    def set(self, mode):
+    def set(self, mode: str):
         assert mode in self.modes
         self.string = mode
 
@@ -580,7 +580,7 @@ class BlendFactor:
 
         self.string = "V0"
 
-    def set(self, factor):
+    def set(self, factor: int):
         assert factor in self.factors
         self.string = self.factors[factor]
 
@@ -601,7 +601,7 @@ class BlendOp:
 
         self.string = "None"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -633,7 +633,7 @@ class LogicOp:
 
         self.string = "None"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -649,7 +649,7 @@ class Material_CTRBlendMode:
         self.blendOp = BlendOp()
         self.logicOp = LogicOp()
 
-    def set(self, type, blendMode=None, useDefault=False):
+    def set(self, type: str, blendMode: Any = None, useDefault: bool = False):
         if useDefault:
             self.type.set("Blend")
             self.srcFactor.set(4)
@@ -689,9 +689,9 @@ class Material_CTR:
     def __init__(self):
         self.tevColReg = Color4(); self.tevColReg.set(0, 0, 0, 0)
         self.tevConstReg = [Color4() for _ in range(6)]
-        self.texMap = []  # TexMap
-        self.texMatrix = []  # TexMatrix
-        self.texCoordGen = []  # TexCoordGen
+        self.texMap: list[TexMap] = []  # TexMap
+        self.texMatrix: list[TexMatrix] = []  # TexMatrix
+        self.texCoordGen: list[TexCoordGen] = []  # TexCoordGen
         self.tevStage = [TevStage()]  # TevStage
         self.alphaCompare = AlphaCompare()
         self.blendMode = Material_CTRBlendMode()
@@ -702,7 +702,7 @@ class Material_CTR:
         self.useDefaultBlendSettings = False
         self.useDefaultAlphaTestSettings = False
 
-    def set(self, blackColor, whileColor, texMap, textureList, texMatrix, texCoordGen, tevStage, name, indirect=None, alphaCompare=None, blendMode=None, blendModeAlpha=None, blendType="None"):
+    def set(self, blackColor: list[int], whileColor: list[int], texMap: list[TexMap], textureList: list[str], texMatrix: list[TexMatrix], texCoordGen: list[TexCoordGen], tevStage: list[TevStage], name: str, indirect = None, alphaCompare = None, blendMode = None, blendModeAlpha = None, blendType: str = "None"): # type: ignore
         r, g, b = blackColor
         self.tevColReg.set(r, g, b, 0)
 
@@ -725,7 +725,7 @@ class Material_CTR:
             self.texCoordGen.append(TexCoordGen())
             self.texCoordGen[-1].set(item)
 
-        self.tevStage = []
+        self.tevStage: list[TevStage] = []
         for item in tevStage:
             self.tevStage.append(TevStage())
             self.tevStage[-1].set(item, indirect)
@@ -740,7 +740,7 @@ class Material_CTR:
         self.blendModeAlpha.set(blendType, blendModeAlpha)
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "tevColReg": self.tevColReg.getAsDict(),
             "tevConstReg": [tevConstReg.getAsDict() for tevConstReg in self.tevConstReg],
             "alphaCompare": self.alphaCompare.getAsDict(),
@@ -783,30 +783,30 @@ class Picture:
 
         self.detailSetting = True
 
-    def set(self, pane, materialList, textureList):
-        material = materialList[pane.materialIdx]
-        vtxCols, texCoords = pane.vtxCols, pane.texCoords
+    def set(self, pane: 'Pane', materialList: list[Material], textureList: list[str]):
+        material = materialList[pane.materialIdx]  # type: ignore
+        vtxCols, texCoords = pane.vtxCols, pane.texCoords  # type: ignore
 
-        self.vtxColLT.set(*vtxCols[0])
-        self.vtxColRT.set(*vtxCols[1])
-        self.vtxColLB.set(*vtxCols[2])
-        self.vtxColRB.set(*vtxCols[3])
+        self.vtxColLT.set(*vtxCols[0])  # type: ignore
+        self.vtxColRT.set(*vtxCols[1])  # type: ignore
+        self.vtxColLB.set(*vtxCols[2])  # type: ignore
+        self.vtxColRB.set(*vtxCols[3])  # type: ignore
 
-        self.texCoord = []
-        for texCoord in texCoords:
+        self.texCoord: list[TexCoord] = []
+        for texCoord in texCoords:  # type: ignore
             self.texCoord.append(TexCoord())
-            self.texCoord[-1].set(*texCoord)
+            self.texCoord[-1].set(*texCoord)  # type: ignore
 
         self.material.set(
-            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,
-            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,
+            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,  # type: ignore
+            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,  # type: ignore
         )
 
-        self.materialCtr.set(
-            material.color0[:3], material.color1[:3],
-            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,
-            material.name, material.indirectParameter, material.alphaCompare,
-            material.blendMode, material.blendModeAlpha, material.blendType,
+        self.materialCtr.set(  # type: ignore
+            material.color0[:3], material.color1[:3],  # type: ignore
+            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,  # type: ignore
+            material.name, material.indirectParameter, material.alphaCompare,  # type: ignore
+            material.blendMode, material.blendModeAlpha, material.blendType,  # type: ignore
         )
 
         #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
@@ -815,7 +815,7 @@ class Picture:
         #    self.detailSetting = True
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "vtxColLT": self.vtxColLT.getAsDict(),
             "vtxColRT": self.vtxColRT.getAsDict(),
             "vtxColLB": self.vtxColLB.getAsDict(),
@@ -835,9 +835,9 @@ class Picture:
 
 class PerCharacterTransformLoopType:
     def __init__(self):
-        self.loop = True
+        self.loop: bool = True
 
-    def set(self, loop):
+    def set(self, loop: bool):
         self.loop = loop
 
     def get(self):
@@ -854,7 +854,7 @@ class VerticalPosition:
 
         self.string = "Center"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -873,7 +873,7 @@ class TextAlignment:
 
         self.string = "Synchronous"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -885,8 +885,8 @@ class TextBox:
     def __init__(self):
         self.fontSize = Vec2()
         self.fontSizeOriginal = Vec2()
-        self.text = ""
-        self.textID = ""
+        self.text: str = ""
+        self.textID: str = ""
         self.topColor = Color4()
         self.bottomColor = Color4()
         self.positionType = Position()
@@ -897,73 +897,73 @@ class TextBox:
         self.shadowTopColor = Color4()
         self.shadowBottomColor = Color4()
 
-        self.font = ""
-        self.charSpace = 0.0
-        self.lineSpace = 0.0
-        self.italicFactor = 0.0
-        self.shadowItalicFactor = 0.0
-        self.perCharacterTransformEnabled = False
+        self.font: str = ""
+        self.charSpace: float = 0.0
+        self.lineSpace: float = 0.0
+        self.italicFactor: float = 0.0
+        self.shadowItalicFactor: float = 0.0
+        self.perCharacterTransformEnabled: bool = False
         self.perCharacterTransformLoopType = PerCharacterTransformLoopType()  # Loop
         self.perCharacterTransformOriginV = VerticalPosition()  # Center
-        self.perCharacterTransformEvalTimeOffset = 0.0
-        self.perCharacterTransformEvalTimeWidth = 0.0
-        self.shadowEnabled = False
-        self.invisibleBorderEnabled = False
-        self.doubleDrawnBorderEnabled = False
+        self.perCharacterTransformEvalTimeOffset: float = 0.0
+        self.perCharacterTransformEvalTimeWidth: float = 0.0
+        self.shadowEnabled: bool = False
+        self.invisibleBorderEnabled: bool = False
+        self.doubleDrawnBorderEnabled: bool = False
         self.textAlignment = TextAlignment()
 
-        self.detailSetting = True
+        self.detailSetting: bool = True
 
-    def set(self, pane, materialList, textureList, fontList):
-        material = materialList[pane.materialIdx]
-        font = fontList[pane.fontIdx]
+    def set(self, pane: 'Pane', materialList: list[Material], textureList: list[str], fontList: list[str]):
+        material = materialList[pane.materialIdx]  # type: ignore
+        font = fontList[pane.fontIdx]  # type: ignore
 
-        self.fontSize.set(*pane.fontSize)
-        self.fontSizeOriginal.set(*pane.fontSize)
-        self.text = pane.text
-        self.textID = pane.textID
-        self.topColor.set(*pane.textCols[0])
-        self.bottomColor.set(*pane.textCols[1])
+        self.fontSize.set(*pane.fontSize)  # type: ignore
+        self.fontSizeOriginal.set(*pane.fontSize)  # type: ignore
+        self.text = pane.text  # type: ignore
+        self.textID = pane.textID  # type: ignore
+        self.topColor.set(*pane.textCols[0])  # type: ignore
+        self.bottomColor.set(*pane.textCols[1])  # type: ignore
         
-        x = (pane.textPosition >> 2) & 3
-        y = pane.textPosition & 3
+        x: int = (pane.textPosition >> 2) & 3  # type: ignore
+        y: int = pane.textPosition & 3  # type: ignore
         self.positionType.set(x, y)
 
         self.material.set(
-            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,
-            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,
+            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,  # type: ignore
+            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,  # type: ignore
         )
 
-        self.materialCtr.set(
-            material.color0[:3], material.color1[:3],
-            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,
-            material.name, material.indirectParameter, material.alphaCompare,
-            material.blendMode, material.blendModeAlpha, material.blendType,
+        self.materialCtr.set(  # type: ignore
+            material.color0[:3], material.color1[:3],  # type: ignore
+            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,  # type: ignore
+            material.name, material.indirectParameter, material.alphaCompare,  # type: ignore
+            material.blendMode, material.blendModeAlpha, material.blendType,  # type: ignore
         )
 
-        self.shadowOffset.set(*pane.shadowOffset)
-        self.shadowScale.set(*pane.shadowScale)
-        self.shadowTopColor.set(*pane.shadowCols[0])
-        self.shadowBottomColor.set(*pane.shadowCols[1])
+        self.shadowOffset.set(*pane.shadowOffset)  # type: ignore
+        self.shadowScale.set(*pane.shadowScale)  # type: ignore
+        self.shadowTopColor.set(*pane.shadowCols[0])  # type: ignore
+        self.shadowBottomColor.set(*pane.shadowCols[1])  # type: ignore
 
         self.font = font
-        self.charSpace = pane.charSpace
-        self.lineSpace = pane.lineSpace
-        self.italicFactor = pane.italicRatio
-        self.shadowItalicFactor = pane.shadowItalicRatio
+        self.charSpace = pane.charSpace  # type: ignore
+        self.lineSpace = pane.lineSpace  # type: ignore
+        self.italicFactor = pane.italicRatio  # type: ignore
+        self.shadowItalicFactor = pane.shadowItalicRatio  # type: ignore
         
-        self.perCharacterTransformEnabled = pane.perCharacterTransformEnabled
+        self.perCharacterTransformEnabled = pane.perCharacterTransformEnabled  # type: ignore
 
-        if pane.perCharacterTransform:
-            self.perCharacterTransformLoopType.set(bool(pane.perCharacterTransform.loopType))
-            self.perCharacterTransformOriginV.set(pane.perCharacterTransform.originV)
-            self.perCharacterTransformEvalTimeOffset = pane.perCharacterTransform.evalTimeOffset
-            self.perCharacterTransformEvalTimeWidth = pane.perCharacterTransform.evalTimeWidth
+        if pane.perCharacterTransform:  # type: ignore
+            self.perCharacterTransformLoopType.set(bool(pane.perCharacterTransform.loopType))  # type: ignore
+            self.perCharacterTransformOriginV.set(pane.perCharacterTransform.originV)  # type: ignore
+            self.perCharacterTransformEvalTimeOffset = pane.perCharacterTransform.evalTimeOffset  # type: ignore
+            self.perCharacterTransformEvalTimeWidth = pane.perCharacterTransform.evalTimeWidth  # type: ignore
 
-        self.shadowEnabled = pane.shadowEnabled
-        self.invisibleBorderEnabled = pane.invisibleBorderEnabled
-        self.doubleDrawnBorderEnabled = pane.doubleDrawnBorderEnabled
-        self.textAlignment.set(pane.textAlignment)
+        self.shadowEnabled = pane.shadowEnabled  # type: ignore
+        self.invisibleBorderEnabled = pane.invisibleBorderEnabled  # type: ignore
+        self.doubleDrawnBorderEnabled = pane.doubleDrawnBorderEnabled  # type: ignore
+        self.textAlignment.set(pane.textAlignment)  # type: ignore
 
         #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
         #        or material.isSeparateBlendMode or material.hasIndirectParameter
@@ -1038,13 +1038,13 @@ class WindowContent:
         self.vtxColRT = Color4()
         self.vtxColLB = Color4()
         self.vtxColRB = Color4()
-        self.texCoord = []
+        self.texCoord: list[TexCoord] = []
         self.material = Material()
         self.materialCtr = Material_CTR()
 
-        self.detailSetting = True
+        self.detailSetting: bool = True
 
-    def set(self, content, materialList, textureList):
+    def set(self, content: Any, materialList: list[Material], textureList: list[str]):
         material = materialList[content.materialIdx]
         vtxCols, texCoords = content.vtxCols, content.texCoords
 
@@ -1059,15 +1059,15 @@ class WindowContent:
             self.texCoord[-1].set(*texCoord)
 
         self.material.set(
-            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,
-            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,
+            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,  # type: ignore
+            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,  # type: ignore
         )
 
-        self.materialCtr.set(
-            material.color0[:3], material.color1[:3],
-            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,
-            material.name, material.indirectParameter, material.alphaCompare,
-            material.blendMode, material.blendModeAlpha, material.blendType,
+        self.materialCtr.set(  # type: ignore
+            material.color0[:3], material.color1[:3],  # type: ignore
+            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,  # type: ignore
+            material.name, material.indirectParameter, material.alphaCompare,  # type: ignore
+            material.blendMode, material.blendModeAlpha, material.blendType,  # type: ignore
         )
 
         #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
@@ -1076,7 +1076,7 @@ class WindowContent:
         #    self.detailSetting = True
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "vtxColLT": self.vtxColLT.getAsDict(),
             "vtxColRT": self.vtxColRT.getAsDict(),
             "vtxColLB": self.vtxColLB.getAsDict(),
@@ -1107,7 +1107,7 @@ class TextureFlip:
 
         self.string = "None"
 
-    def set(self, mode):
+    def set(self, mode: int):
         assert mode in self.modes
         self.string = self.modes[mode]
 
@@ -1130,7 +1130,7 @@ class WindowFrameType:
 
         self.string = "CornerLT"
 
-    def set(self, type):
+    def set(self, type: int):
         assert type in self.types
         self.string = self.types[type]
 
@@ -1145,24 +1145,24 @@ class WindowFrame:
         self.materialCtr = Material_CTR()
 
         self.frameType = WindowFrameType()
-        self.detailSetting = True
+        self.detailSetting: bool = True
 
-    def set(self, frame, i, materialList, textureList):
+    def set(self, frame: Any, i: int, materialList: list[Material], textureList: list[str]):
         material = materialList[frame.materialIdx]
 
         self.textureFlip.set(frame.textureFlip)
         self.frameType.set(i)
 
         self.material.set(
-            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,
-            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,
+            material.color0, material.color1, material.resTexMaps, textureList, material.texSRTs,  # type: ignore
+            material.texCoordGen, material.name, material.isThresholdingAlphaInterpolation,  # type: ignore
         )
 
-        self.materialCtr.set(
-            material.color0[:3], material.color1[:3],
-            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,
-            material.name, material.indirectParameter, material.alphaCompare,
-            material.blendMode, material.blendModeAlpha, material.blendType,
+        self.materialCtr.set(  # type: ignore
+            material.color0[:3], material.color1[:3],  # type: ignore
+            material.resTexMaps, textureList, material.texSRTs, material.texCoordGen, material.tevStages,  # type: ignore
+            material.name, material.indirectParameter, material.alphaCompare,  # type: ignore
+            material.blendMode, material.blendModeAlpha, material.blendType,  # type: ignore
         )
 
         #if (material.hasAlphaCompare or material.hasBlendMode or material.isTextureOnly
@@ -1186,12 +1186,12 @@ class WindowFrame:
 
 class InflationRect:
     def __init__(self):
-        self.l = 0.0
-        self.r = 0.0
-        self.t = 0.0
-        self.b = 0.0
+        self.l: float = 0.0
+        self.r: float = 0.0
+        self.t: float = 0.0
+        self.b: float = 0.0
 
-    def set(self, l, r, t, b):
+    def set(self, l: float, r: float, t: float, b: float):
         self.l, self.r, self.t, self.b = l, r, t, b
 
     def getAsDict(self):
@@ -1205,12 +1205,12 @@ class InflationRect:
 
 class WindowFrameSize:
     def __init__(self):
-        self.l = 0.0
-        self.r = 0.0
-        self.t = 0.0
-        self.b = 0.0
+        self.l: float = 0.0
+        self.r: float = 0.0
+        self.t: float = 0.0
+        self.b: float = 0.0
 
-    def set(self, l, r, t, b):
+    def set(self, l: float, r: float, t: float, b: float):
         self.l, self.r, self.t, self.b = l, r, t, b
 
     def getAsDict(self):
@@ -1232,7 +1232,7 @@ class WindowKind:
 
         self.string = "Around"
 
-    def set(self, kind):
+    def set(self, kind: int):
         assert kind in self.kinds
         self.string = self.kinds[kind]
 
@@ -1252,12 +1252,12 @@ class Window:
         self.useVtxColorForAllWindow = False
         self.notDrawContent = False
 
-    def set(self, pane, materialList, textureList):
+    def set(self, pane: Any, materialList: list[Material], textureList: list[str]):
         self.content.set(pane.content, materialList, textureList)
 
         assert pane.frames
 
-        self.frame = []
+        self.frame: list[WindowFrame] = []
         for i, frame in enumerate(pane.frames):
             self.frame.append(WindowFrame())
             self.frame[-1].set(frame, i, materialList, textureList)
@@ -1302,7 +1302,7 @@ class PartsPropertyUsageOptions:
 
         self.string = "None"
 
-    def set(self, option):
+    def set(self, option: int):
         assert option in self.options
         self.string = self.options[option]
 
@@ -1329,32 +1329,32 @@ class Property:
         self.target = LRName()
         self.usageOptions = PartsPropertyUsageOptions()  # default: None
 
-    def set(self, property, materialList, textureList, fontList):
+    def set(self, property: Any, materialList: list[Material], textureList: list[str], fontList: list[str]):
         self.alpha = None
         self.visible = None
 
         if property.property:
-            pane = property.property
+            pane: Any = property.property
 
             if isinstance(pane, FLYT.Picture):
                 self.picture = Picture()
-                self.picture.set(pane, materialList, textureList)
-                self.kind.set(1)
+                self.picture.set(pane, materialList, textureList)  # type: ignore
+                self.kind.set(1)  # type: ignore
 
             elif isinstance(pane, FLYT.TextBox):
                 self.textBox = TextBox()
-                self.textBox.set(pane, materialList, textureList, fontList)
-                self.kind.set(2)
+                self.textBox.set(pane, materialList, textureList, fontList)  # type: ignore
+                self.kind.set(2)  # type: ignore
 
             elif isinstance(pane, FLYT.Window):
                 self.window = Window()
                 self.window.set(pane, materialList, textureList)
-                self.kind.set(3)
+                self.kind.set(3)  # type: ignore
 
             elif isinstance(pane, FLYT.Parts):
                 self.parts = Parts()
-                self.parts.set(pane, materialList, textureList, fontList)
-                self.kind.set(5)
+                self.parts.set(pane, materialList, textureList, fontList)  # type: ignore
+                self.kind.set(5)  # type: ignore
 
         if property.extUserDataList:
             self.userData = UserData()
@@ -1373,7 +1373,7 @@ class Property:
         self.usageOptions.set(property.usageFlag)
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "@kind": self.kind.get(),
             "@target": self.target.get(),
             "@usageOptions": self.usageOptions.get(),
@@ -1401,23 +1401,23 @@ class Property:
 
         if self.translate:
             _dict["translate"] = self.translate.getAsDict()
-            _dict["rotate"] = self.rotate.getAsDict()
-            _dict["scale"] = self.scale.getAsDict()
-            _dict["size"] = self.size.getAsDict()
+            _dict["rotate"] = self.rotate.getAsDict()  # type: ignore
+            _dict["scale"] = self.scale.getAsDict()  # type: ignore
+            _dict["size"] = self.size.getAsDict()  # type: ignore
 
         return _dict
 
 
 class Parts:
     def __init__(self):
-        self.property = []  # Property
+        self.property: list[Property] = []  # Property
         self.magnify = Vec2()
         self.rawMagnify = Vec2()
         self.sizeConstraint = Vec2()
 
         self.path = ""
 
-    def set(self, pane, materialList, textureList, fontList):
+    def set(self, pane: Any, materialList: list[Material], textureList: list[str], fontList: list[str]):
         properties, magnify, filename = pane.properties, pane.magnify, pane.filename
 
         for property in properties:
@@ -1426,7 +1426,7 @@ class Parts:
 
         self.magnify.set(*magnify)
         self.rawMagnify.set(*magnify)
-        self.sizeConstraint.set(0.0, 0.0)
+        self.sizeConstraint.set(0.0, 0.0)  # type: ignore
 
         # todo: add part reading
         print("please go convert %s.bflyt as well" % filename)
@@ -1459,7 +1459,7 @@ class PaneKind:
 
         self.string = "Null"
 
-    def set(self, kind):
+    def set(self, kind: int):
         assert kind in self.kinds
         self.string = self.kinds[kind]
 
@@ -1471,7 +1471,7 @@ class PartsMagnifyInfluence:
     def __init__(self):
         self.string = "None"
 
-    def set(self, adjustToPartsBound=False):
+    def set(self, adjustToPartsBound: bool = False):
         if adjustToPartsBound:
             self.string = "AdjustToPartsBound"
 
@@ -1511,7 +1511,7 @@ class Pane:
         self.readonlyLocked = False
         self.avoidPaneTreeCompression = False
 
-    def set(self, pane, materialList, textureList, fontList):
+    def set(self, pane: Any, materialList: list[Material], textureList: list[str], fontList: list[str]):
         parentRelativeY = (pane.basePosition >> 6) & 3
         parentRelativeX = (pane.basePosition >> 4) & 3
         baseY = (pane.basePosition >> 2) & 3
@@ -1534,12 +1534,12 @@ class Pane:
 
         if isinstance(pane, FLYT.Picture):
             self.picture = Picture()
-            self.picture.set(pane, materialList, textureList)
+            self.picture.set(pane, materialList, textureList)  # type: ignore
             self.kind.set(1)
 
         elif isinstance(pane, FLYT.TextBox):
             self.textBox = TextBox()
-            self.textBox.set(pane, materialList, textureList, fontList)
+            self.textBox.set(pane, materialList, textureList, fontList)  # type: ignore
             self.kind.set(2)
 
         elif isinstance(pane, FLYT.Window):
@@ -1570,7 +1570,7 @@ class Pane:
             self.userData.append(pane.extUserDataList.extUserData)
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "comment": self.comment,
             "basePositionType": self.basePositionType.getAsDict(),
             "parentRelativePositionType": self.parentRelativePositionType.getAsDict(),
@@ -1633,9 +1633,9 @@ class Pane:
 
 class PaneSet:
     def __init__(self):
-        self.panes = []
+        self.panes: list[Pane] = []
 
-    def set(self, panes, materialList, textureList, fontList):
+    def set(self, panes: list[Pane], materialList: list[Material], textureList: list[str], fontList: list[str]):
         for pane in panes:
             self.panes.append(Pane())
             self.panes[-1].set(pane, materialList, textureList, fontList)
@@ -1649,16 +1649,16 @@ class PaneTree:
         self.name = ""
         self.childList = []
 
-    def set(self, pane):
+    def set(self, pane: Pane):
         self.name = pane.name
-        self.childList = []
-        for child in pane.childList:
+        self.childList: list[Pane] = []
+        for child in pane.childList:  # type: ignore
             paneTree = PaneTree()
-            paneTree.set(child)
-            self.childList.append(paneTree.getAsDict())
+            paneTree.set(child)  # type: ignore
+            self.childList.append(paneTree.getAsDict())  # type: ignore
 
     def getAsDict(self):
-        _dict = {"@name": self.name}
+        _dict: dict[str, Any] = {"@name": self.name}
 
         if self.childList:
             _dict["paneTree"] = self.childList
@@ -1667,7 +1667,7 @@ class PaneTree:
 
 
 class PaneHierarchy:
-    def __init__(self, rootPane):
+    def __init__(self, rootPane: Pane):
         self.rootPane = rootPane
 
     def getAsDict(self):
@@ -1681,7 +1681,7 @@ class GroupPaneRef:
     def __init__(self):
         self.name = LRName()
 
-    def set(self, name):
+    def set(self, name: str):
         self.name.set(name)
 
     def getAsDict(self):
@@ -1695,15 +1695,15 @@ class Group:
 
         self.name = ""
 
-    def set(self, group):
+    def set(self, group: 'Group'):
         self.name = group.name
-        self.paneRef = []
-        for pane in group.panes:
+        self.paneRef: list[GroupPaneRef] = []
+        for pane in group.panes:  # type: ignore
             self.paneRef.append(GroupPaneRef())
-            self.paneRef[-1].set(pane)
+            self.paneRef[-1].set(pane)  # type: ignore
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "comment": self.comment,
             "@name": self.name,
         }
@@ -1719,14 +1719,14 @@ class RootGroup:
         self.group = []
         self.comment = None
 
-    def set(self, groupList):
-        self.group = []
+    def set(self, groupList: list[Group]):
+        self.group: list[Group] = []
         for group in groupList:
             self.group.append(Group())
             self.group[-1].set(group)
 
     def getAsDict(self):
-        _dict = {
+        _dict: dict[str, Any] = {
             "comment": self.comment,
             "@name": "RootGroup",
         }
@@ -1738,7 +1738,7 @@ class RootGroup:
 
 
 class GroupSet:
-    def __init__(self, groupList):
+    def __init__(self, groupList: list[Group]):
         self.groupList = groupList
 
     def getAsDict(self):
@@ -1786,7 +1786,7 @@ class ScreenOriginType:
 
         self.string = "Classic"
 
-    def set(self, type):
+    def set(self, type: int):
         assert type in self.types
         self.string = self.types[type]
 
@@ -1802,7 +1802,7 @@ class ScreenSetting:
 
         self.origin = ScreenOriginType()
 
-    def set(self, width, height, origin):
+    def set(self, width: int, height: int, origin: int):
         self.layoutSize.set(width, height)
         self.origin.set(origin)
 
@@ -1817,10 +1817,10 @@ class ScreenSetting:
 
 class ControlParameterPane:
     def __init__(self):
-        self.name = ""
+        self.name: str = ""
         self.paneName = LRName()
 
-    def set(self, paneName, name):
+    def set(self, paneName: str, name: str):
         self.paneName.set(paneName)
         self.name = name
 
@@ -1833,10 +1833,10 @@ class ControlParameterPane:
 
 class ControlParameterAnimation:
     def __init__(self):
-        self.name = ""
-        self.tagName = ""
+        self.name: str = ""
+        self.tagName: str = ""
 
-    def set(self, tagName, name):
+    def set(self, tagName: str, name: str):
         self.tagName = tagName
         self.name = name
 
@@ -1853,17 +1853,17 @@ class Control:
         self.parameterAnimation = []  # ControlParameterAnimation
         self.userData = None  # UserData
 
-        self.name = ""
-        self.userName = ""
+        self.name: str = ""
+        self.userName: str = ""
 
-    def set(self, name, userName, paneNames, animNames, paneParameterNames, animParameterNames, extUserDataList):
+    def set(self, name: str, userName: str, paneNames: list[str], animNames: list[str], paneParameterNames: list[str], animParameterNames: list[str], extUserDataList: list[Any]):
         self.name = name
         self.userName = userName
 
         if not self.userName:
             self.userName = name
 
-        self.parameterPane = []
+        self.parameterPane: list[ControlParameterPane] = []
         if paneNames:
             if not paneParameterNames:
                 paneParameterNames = paneNames
@@ -1872,7 +1872,7 @@ class Control:
                 self.parameterPane.append(ControlParameterPane())
                 self.parameterPane[-1].set(paneName, paneParameterName)
 
-        self.parameterAnimation = []
+        self.parameterAnimation: list[ControlParameterAnimation] = []
         if animNames:
             if not animParameterNames:
                 animParameterNames = animNames
@@ -1884,10 +1884,10 @@ class Control:
         self.userData = None
         if extUserDataList:
             self.userData = UserData()
-            self.userData.set(extUserDataList.extUserData)
+            self.userData.set(extUserDataList.extUserData)  # type: ignore
 
     def getAsDict(self):
-        _dict = {"@name": self.name, "@userName": self.userName}
+        _dict: dict[str, Any] = {"@name": self.name, "@userName": self.userName}
 
         if self.parameterPane:
             _dict["parameterPane"] = [parameterPane.getAsDict() for parameterPane in self.parameterPane]
@@ -1926,7 +1926,7 @@ class TexelFormat:
         "u": "RGB565_INDIRECT",
     }
 
-    def __init__(self, format):
+    def __init__(self, format: str):
         formats = TexelFormat.formats
 
         assert format in formats
@@ -1937,7 +1937,7 @@ class TexelFormat:
 
 
 class TextureFile:
-    def __init__(self, timgPath, timgOutP, texture, format):
+    def __init__(self, timgPath: str, timgOutP: str, texture: str, format: str):
         self.imagePath = '%s\\%s.tga' % (".\\Textures", texture)
         self.format = TexelFormat(format[1])
 
@@ -1967,7 +1967,7 @@ class TextureFile:
 
 
 class FontFile:
-    def __init__(self, font, path=".\\Fonts"):
+    def __init__(self, font: str, path: str = ".\\Fonts"):
         # todo automatic font fetching
         #self.path = os.path.join(path, '%s.bffnt' % font)
         self.path = '%s\\%s.bffnt' % (path, font)
@@ -1988,7 +1988,7 @@ class PropertyForm:
         self.kind = PaneKind()
         self.target = LRName()
 
-    def set(self, pane):
+    def set(self, pane: Any):
         if isinstance(pane, FLYT.Picture):
             self.kind.set(1)
 
@@ -2015,7 +2015,7 @@ class PropertyForm:
 
 
 class Layout:
-    def __init__(self, file, timgPath, timgOutP, textures, formats):
+    def __init__(self, file: str, timgPath: str, timgOutP: str, textures: list[str], formats: list[str]):
         with open(file, "rb") as inf:
             inb = inf.read()
 
@@ -2024,9 +2024,9 @@ class Layout:
         self.flyt = FLYT(inb)
         if self.flyt.txl and textures and formats:
             for texture, format in zip(textures, formats):
-                if texture not in self.flyt.txl.textures:
-                    self.flyt.txl.textures.append(texture)
-                    self.flyt.txl.formats.append(format)
+                if texture not in self.flyt.txl.textures:  # type: ignore
+                    self.flyt.txl.textures.append(texture)  # type: ignore
+                    self.flyt.txl.formats.append(format)  # type: ignore
 
         self.timgPath = timgPath
         self.timgOutP = timgOutP
@@ -2037,21 +2037,21 @@ class Layout:
             layout = self.flyt.lyt
 
             if self.flyt.txl:
-                textures = self.flyt.txl.textures
-                formats = self.flyt.txl.formats
+                textures = self.flyt.txl.textures  # type: ignore
+                formats = self.flyt.txl.formats  # type: ignore
 
             else:
                 textures = []
                 formats = []
 
             if self.flyt.fnl:
-                fonts = self.flyt.fnl.fonts
+                fonts = self.flyt.fnl.fonts  # type: ignore
 
             else:
                 fonts = []
 
             if self.flyt.mat:
-                materials = self.flyt.mat.materials
+                materials = self.flyt.mat.materials  # type: ignore
 
             else:
                 materials = []
@@ -2059,8 +2059,8 @@ class Layout:
             paneSet = PaneSet()
             paneSet.set(rootPane.getChildren(), materials, textures, fonts)
 
-            paneHierarchy = PaneHierarchy(rootPane)
-            groupSet = GroupSet(self.flyt.groupList)
+            paneHierarchy = PaneHierarchy(rootPane)  # type: ignore
+            groupSet = GroupSet(self.flyt.groupList)  # type: ignore
             screenSetting = ScreenSetting()
             screenSetting.set(layout.layoutWidth, layout.layoutHeight, layout.originType)
 
@@ -2070,25 +2070,25 @@ class Layout:
 
                 control = Control()
                 control.set(
-                    cnt.controlName, cnt.controlUserName, cnt.controlFunctionalPaneNames,
-                    cnt.controlFunctionalAnimNames, cnt.controlFunctionalPaneParameterNames,
-                    cnt.controlFunctionalAnimParameterNames, cnt.extUserDataList,
+                    cnt.controlName, cnt.controlUserName, cnt.controlFunctionalPaneNames,  # type: ignore
+                    cnt.controlFunctionalAnimNames, cnt.controlFunctionalPaneParameterNames,  # type: ignore
+                    cnt.controlFunctionalAnimParameterNames, cnt.extUserDataList,  # type: ignore
                 )
 
             textureList = []
             fontList = []
 
-            for texture, format in zip(textures, formats):
+            for texture, format in zip(textures, formats):  # type: ignore
                 if format[0] == '+':
                     print("%s%s.bflim conversion skipped, please convert %s^%s.bflim or make sure it has already been converted." % (texture, format, texture, format[1:]))
                     continue
 
-                textureList.append(TextureFile(self.timgPath, self.timgOutP, texture, format))
+                textureList.append(TextureFile(self.timgPath, self.timgOutP, texture, format))  # type: ignore
 
-            for font in fonts:
-                fontList.append(FontFile(font))
+            for font in fonts:  # type: ignore
+                fontList.append(FontFile(font))  # type: ignore
 
-            _dict = OrderedDict()
+            _dict: dict[str, Any] = OrderedDict()
             _dict["paneSet"] = paneSet.getAsDict()
             _dict["paneHierarchy"] = paneHierarchy.getAsDict()
             _dict["groupSet"] = groupSet.getAsDict()
@@ -2098,21 +2098,21 @@ class Layout:
                 _dict["control"] = [control.getAsDict()]
 
             if textureList:
-                _dict["textureFile"] = [texture.getAsDict() for texture in textureList]
+                _dict["textureFile"] = [texture.getAsDict() for texture in textureList]  # type: ignore
 
             if fontList:
-                _dict["fontFile"] = [font.getAsDict() for font in fontList]
+                _dict["fontFile"] = [font.getAsDict() for font in fontList]  # type: ignore
 
             if layout.partsWidth and layout.partsHeight:
                 propertyForms = []
-                for pane in rootPane.getChildren():
-                    propertyForms.append(PropertyForm())
-                    propertyForms[-1].set(pane)
+                for pane in rootPane.getChildren():  # type: ignore
+                    propertyForms.append(PropertyForm())  # type: ignore
+                    propertyForms[-1].set(pane)  # type: ignore
 
                 partsSize = Vec2()
                 partsSize.set(layout.partsWidth, layout.partsHeight)
 
-                _dict["propertyForm"] = [propertyForm.getAsDict() for propertyForm in propertyForms]
+                _dict["propertyForm"] = [propertyForm.getAsDict() for propertyForm in propertyForms]  # type: ignore
                 _dict["partsName"] = 'L_%s' % self.filename
                 _dict["partsSize"] = partsSize.getAsDict()
 

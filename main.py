@@ -1,17 +1,24 @@
 from collections import OrderedDict
 import os
+import sys
 
 from common import dictToXml, Head
 from flyt import Layout
 from flan import main as flanMain
 
-
 def main():
-    print("Layout Exporter U v1.0.0")
+    print("Layout Exporter U v1.0.2")
     print("(C) 2019 AboodXD\n")
+    if len(sys.argv) == 2: return print("Usage: py main.py <input.bflyt> <output.flyt>")
 
-    file = input("Input (.bflyt):  ")
-    output = input("Output (.flyt):  ")
+    if len(sys.argv) < 2:
+        file = input("Input file (.bflyt): ")
+        output = input("Output file: (.flyt): ")
+    else:
+        file = sys.argv[1]
+        output = sys.argv[2]
+
+    print(f"Exporting {file} -> {output}")
 
     animPath = os.path.join(os.path.dirname(os.path.dirname(file)), 'anim')
     timgPath = os.path.join(os.path.dirname(os.path.dirname(file)), 'timg')
@@ -20,7 +27,7 @@ def main():
     fileName = os.path.splitext(os.path.basename(file))[0]
     animOutput = os.path.splitext(output)[0] + ".flan"
 
-    files = []
+    files: list[str] = []
     if os.path.isfile(os.path.join(animPath, fileName + ".bflan")):
         files.append(fileName + ".bflan")
 
@@ -29,7 +36,8 @@ def main():
             if _file.startswith(fileName + "_"):
                 files.append(_file)
 
-    textures, formats = None, None
+    textures: list[str] = []
+    formats: list[str] = []
     if files:
         textures, formats = flanMain(files, animPath, animOutput)
 
