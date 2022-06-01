@@ -61,7 +61,7 @@ class Head:
     title = None
     comment = None
     generatorName = "Layout Exporter U"
-    generatorVersion = "1.0.2"
+    generatorVersion = "1.0.3"
 
     def getAsDict(self):
         _dict: OrderedDict[str, Any] = OrderedDict()

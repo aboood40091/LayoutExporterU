@@ -7,7 +7,7 @@ from flyt import Layout
 from flan import main as flanMain
 
 def main():
-    print("Layout Exporter U v1.0.2")
+    print("Layout Exporter U v1.0.3")
     print("(C) 2019 AboodXD\n")
     if len(sys.argv) == 2: return print("Usage: py main.py <input.bflyt> <output.flyt>")
 

@@ -1,4 +1,5 @@
 // Utility script to batch export an entire folder of layouts.
+//! This script supresses warnings from the main script.
 //
 // This script expects a folder with the following structure as input: (This is the structure provided by SwitchToolbox when extracting lyt_root)
 // - <inputFolder>/
