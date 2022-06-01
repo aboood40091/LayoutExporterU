@@ -1954,7 +1954,7 @@ class TextureFile:
         else:
             try:
                 BFLIM.toTGA(inb, texture, timgOutP)
-                print("%s%s.bflim converted" % (texture, format))
+                # print("%s%s.bflim converted" % (texture, format))
 
             except NotImplementedError:
                 print("please convert %s%s.bflim" % (texture, format))

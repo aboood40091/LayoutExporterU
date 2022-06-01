@@ -270,13 +270,14 @@ class RefRes:
 
 class AnimTarget:
     def __init__(self):
-        self.refRes = []
         self.key: list[Step or Hermite] = []
 
         self.id: int = 0
         self.target = AnimTargetType()
 
         self.idx: int = 0
+        self.lan: Lan = None  # type: ignore
+        self.isTexPattern: bool = False
 
     def __eq__(self, other: object) -> bool:
         return self.idx == other.idx  # type: ignore
@@ -294,8 +295,9 @@ class AnimTarget:
             self.key.append(func())
             self.key[-1].set(startFrame, key)  # type: ignore
 
-    def set(self, startFrame: Any, curveType: Any, keys: list[Any], id: int, type_: str, target: int, refRes: list[str] = []):
+    def set(self, startFrame: Any, curveType: Any, keys: list[Any], id: int, type_: str, target: int, lan: 'Lan'):
         self.id = id
+        self.lan = lan
 
         self.idx = target
         if type_ in ["TextureSRT", "TexturePattern", "IndTextureSRT"]:
@@ -303,8 +305,6 @@ class AnimTarget:
 
         self.key = []
         self.addKeys(startFrame, curveType, keys)
-
-        self.refRes: list[RefRes] = []
 
         if type_ == "PaneSRT":
             self.target.set(self.target.paneTargets[target])
@@ -323,9 +323,7 @@ class AnimTarget:
 
         elif type_ == "TexturePattern":
             self.target.set("Image")
-            for name in refRes:
-                self.refRes.append(RefRes())
-                self.refRes[-1].set(name)
+            self.isTexPattern = True
 
         elif type_ == "IndTextureSRT":
             self.target.set(self.target.texSRTTargets[target + 2])
@@ -348,8 +346,8 @@ class AnimTarget:
             "@target": self.target.get(),
         }
 
-        if self.refRes:
-            _dict["refRes"] = [refRes.getAsDict() for refRes in self.refRes]
+        if self.isTexPattern:
+            _dict["refRes"] = [{"@name": refRes} for refRes in self.lan.refRes]
 
         if self.key:
             _dict["key"] = [key.getAsDict() for key in self.key]
@@ -497,6 +495,8 @@ class Lan:
         self.convertStartFrame: int = 0
         self.convertEndFrame: int = 0
 
+        self.refRes: list[str] = []
+
     def set(self, tags: list[Any], anim: list[FLAN], animContsNames: list[str], type_: bytes, minFrame: int, maxFrame: int):
         self.animType.set(type_)
         self.startFrame = minFrame
@@ -509,9 +509,12 @@ class Lan:
             for i, flan in enumerate(anim):
                 if tags:
                     startFrame = tags[i].startFrame
-
                 else:
                     startFrame = 0
+                if self.animType.get() == 'TexturePattern':
+                    for name in flan.info.fileNames:  # type: ignore
+                        self.refRes.append(name)
+                    self.refRes = list(dict.fromkeys(self.refRes))
 
                 for animCont in flan.info.animConts:  # type: ignore
                     if animContName == animCont.name:  # type: ignore
@@ -519,7 +522,7 @@ class Lan:
                             if type_ == animInfo.magic:  # type: ignore
                                 for target in animInfo.animTargets:  # type: ignore
                                     _target = AnimTarget()
-                                    _target.set(startFrame, target.curveType, target.keys, target.id, self.animType.get(), target.target, flan.info.fileNames)  # type: ignore
+                                    _target.set(startFrame, target.curveType, target.keys, target.id, self.animType.get(), target.target, self)  # type: ignore
 
                                     for __target in targetsUsed:  # type: ignore
                                         if _target == __target:
