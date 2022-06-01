@@ -9,7 +9,7 @@
 
 try:
     import pyximport
-    pyximport.install()
+    pyximport.install(language_level=3)
 
     from . import addrlib_cy as addrlib  # type: ignore
 
