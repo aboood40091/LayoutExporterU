@@ -1938,7 +1938,7 @@ class TexelFormat:
 
 class TextureFile:
     def __init__(self, timgPath: str, timgOutP: str, texture: str, format: str):
-        self.imagePath = '%s\\%s.tga' % (".\\Textures", texture)
+        self.imagePath = '%s\\%s.tga' % ("Textures", texture)
         self.format = TexelFormat(format[1])
 
         if not os.path.isdir(timgOutP):
@@ -1967,12 +1967,12 @@ class TextureFile:
 
 
 class FontFile:
-    def __init__(self, font: str, path: str = ".\\Fonts"):
+    def __init__(self, font: str, path: str = "Fonts"):
         # todo automatic font fetching
         #self.path = os.path.join(path, '%s.bffnt' % font)
         self.path = '%s\\%s.bffnt' % (path, font)
         print(self.path)
-        self.name = '%s.bffnt' % font
+        self.name = '%s' % font
 
     def getAsDict(self):
         return {
