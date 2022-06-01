@@ -1869,6 +1869,7 @@ class Control:
                 paneParameterNames = paneNames
 
             for paneName, paneParameterName in zip(paneNames, paneParameterNames):
+                if not paneName and not paneParameterName: continue
                 self.parameterPane.append(ControlParameterPane())
                 self.parameterPane[-1].set(paneName, paneParameterName)
 
