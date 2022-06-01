@@ -7,9 +7,8 @@
 //   - blyt/ (.bflyt files)
 //   - timg/ (.bflim files)
 //
-// The input folder must be inside a folder named Layouts in the same folder as this script.
-// The output will be placed in Layouts/<inputFolder>/flyt/
-// Remember to place a folder named Fonts in the /flyt/ folder containing the required fonts.
+// The output files will be placed in <inputFolder>/flyt/
+// Remember to place a folder named "Fonts" in the /flyt/ folder containing the required fonts in BFFNT format.
 
 import fs from 'fs';
 import { execSync } from 'child_process';
@@ -20,9 +19,9 @@ if (!inputFolder) {
     process.exit(1);
 }
 
-if (!fs.existsSync(`Layouts/${inputFolder}/flyt`)) fs.mkdirSync(`Layouts/${inputFolder}/flyt`);
+if (!fs.existsSync(`${inputFolder}/flyt`)) fs.mkdirSync(`${inputFolder}/flyt`);
 
-fs.readdirSync(`Layouts/${inputFolder}/blyt`).map(lyt => [`blyt/${lyt}`, `flyt/${lyt.slice(0, -6)}.flyt`]).forEach(([bflyt, flyt]) => {
+fs.readdirSync(`${inputFolder}/blyt`).map(lyt => [`blyt/${lyt}`, `flyt/${lyt.slice(0, -6)}.flyt`]).forEach(([bflyt, flyt]) => {
     console.log(`Converting: ${inputFolder}/${bflyt} -> ${inputFolder}/${flyt}`);
-    execSync(`py main.py Layouts/${inputFolder}/${bflyt} Layouts/${inputFolder}/${flyt}`);
+    execSync(`py main.py ${inputFolder}/${bflyt} ${inputFolder}/${flyt}`);
 });
